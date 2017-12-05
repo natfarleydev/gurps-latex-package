@@ -4,17 +4,17 @@
 \iffalse
 %</internal>
 %<*readme>
-|       |
--------:|------------------------------------------------------------------
-  gurps:| A new LaTeX package
- Author:| Nathanael Farley
- E-mail:| (not set)
-License:| Released under the LaTeX Project Public License v1.3c or later
-    See:| http://www.latex-project.org/lppl.txt
+|        |                                                                 |
+|-------:|------------------------------------------------------------------
+|  gurps:| A LaTeX package for GURPS typesetting                           |
+| Author:| Nathanael Farley                                                |
+| E-mail:| (not set)                                                       |
+|License:| Released under the LaTeX Project Public License v1.3c or later  |
+|    See:| http://www.latex-project.org/lppl.txt                           |
 
 
 Short description:
-Some text about the package: probably the same as the abstract.
+TODO this description.
 
 Disclaimer:
 The material presented here is my original creation, intended for use with the
@@ -23,7 +23,7 @@ href="http://www.sjgames.com/">Steve Jackson Games</a>. This material is not
 official and is not endorsed by Steve Jackson Games.
 
 Notice:
-<a href="http://www.sjgames.com/gurps/"><b><i>GURPS</i></b></a> is a registered trademark of Steve Jackson Games, and the art here is copyrighted by Steve Jackson Games. All rights are reserved by SJ Games. This material is used here in accordance with the SJ Games <a href="http://www.sjgames.com/general/online_policy.html">online policy</a>.
+<a href="http://www.sjgames.com/gurps/"><b><i>GURPS</i></b></a> is a registered trademark of Steve Jackson Games, and is copyrighted by Steve Jackson Games. All rights are reserved by SJ Games. This material is used here in accordance with the SJ Games <a href="http://www.sjgames.com/general/online_policy.html">online policy</a>.
 %</readme>
 %<*internal>
 \fi
@@ -38,7 +38,7 @@ Notice:
 \askforoverwritefalse
 \preamble
 -------:| -----------------------------------------------------------------
-  gurps:| A new LaTeX package
+  gurps:| A LaTeX package for GURPS typesetting
  Author:| Nathanael Farley
  E-mail:| (not set)
 License:| Released under the LaTeX Project Public License v1.3c or later
@@ -97,7 +97,7 @@ Running "make install" installs the files in the local TeX tree.
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<package>\ProvidesPackage{gurps}
 %<*package>
-    [2017/12/04 v1.00 A new LaTeX package]
+    [2017/12/04 v0.1 A LaTeX package for GURPS typesetting]
 %</package>
 %<*driver>
 \documentclass{ltxdoc}
@@ -116,18 +116,20 @@ Running "make install" installs the files in the local TeX tree.
 % \GetFileInfo{\jobname.dtx}
 % \DoNotIndex{\newcommand,\newenvironment}
 %
-%\title{\textsf{gurps} --- A new LaTeX package\thanks{This file
-%   describes version \fileversion, last revised \filedate.}
+% \title{\textsf{gurps} --- A LaTeX package for GURPS typesetting\thanks{This file
+% describes version \fileversion, last revised \filedate.}
 %}
 %\author{Nathanael Farley\thanks{E-mail: nasfarley88@gmail.com}}
 %\date{Released \filedate}
 %
 %\maketitle
 %
-%\changes{v1.00}{2017/12/04}{First public release}
+%\changes{v0.1}{2017/12/05}{First public release}
 %
 % \begin{abstract}
-% ==== Put abstract text here. ====
+%   \textit{\textbf{GURPS}} is an excellent RPG system. \LaTeX{} is an excellent
+%   typesetting system. Together, they make excellent game aids. At least, they
+%   do with this package!
 % \end{abstract}
 %
 % \section{Usage}
