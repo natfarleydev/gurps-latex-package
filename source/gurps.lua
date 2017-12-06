@@ -21,7 +21,6 @@ function base_stat(stat, multiplier, default)
   default = default or 10
   stat = stat or default
   multiplier = multiplier or 10
-  print(default)
   return valued_trait(stat, (stat - default)*multiplier)
 end
 
@@ -55,7 +54,6 @@ base_stats = {
 function count_points()
   running_total = 0
   for i,base_stat in pairs(base_stats) do
-    print(base_stat)
     running_total = running_total + character[base_stat].points
   end
   for i,traits in pairs({"advantages", "disadvantages", "skills"}) do
