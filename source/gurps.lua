@@ -55,11 +55,12 @@ base_stats = {
 function count_points()
   running_total = 0
   for i,base_stat in pairs(base_stats) do
+    print(base_stat)
     running_total = running_total + character[base_stat].points
   end
   for i,traits in pairs({"advantages", "disadvantages", "skills"}) do
     for j,v in pairs(character[traits]) do
-      if v ~= "?" then
+      if v.points ~= "?" then
         running_total = running_total + v.points
       end
     end
