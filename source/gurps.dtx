@@ -242,7 +242,7 @@ Running "make install" installs the files in the local TeX tree.
 % which is reused every time a new environment is made. All configuration of the
 % character is made after this point
 %    \begin{macrocode}
-  \luadirect{character = create_character(#1)}%
+  \luadirect{character = create_character({#1})}%
 }{%
 %    \end{macrocode}
 % At the end of the environment, the character is printed (via lua's |tex.print|).
@@ -256,7 +256,7 @@ Running "make install" installs the files in the local TeX tree.
 % Like |character|, but it's a lens.
 %    \begin{macrocode}
 \newenvironment{lens}[1]{%
-  \luadirect{character = create_character(#1)}%
+  \luadirect{character = create_character({#1})}%
 }{%
   \luadirect{print_character_as_lens()}
 }

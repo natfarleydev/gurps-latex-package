@@ -25,13 +25,14 @@ function base_stat(stat, multiplier, default)
   return valued_trait(stat, (stat - default)*multiplier)
 end
 
-function create_character(st, dx, iq, ht)
+function create_character(args)
   -- Creates a character
+  local args = args or {}
   local c = {
-    ST=base_stat(st),
-    DX=base_stat(dx, 20),
-    IQ=base_stat(iq, 20),
-    HT=base_stat(ht),
+    ST=base_stat(args.ST),
+    DX=base_stat(args.DX, 20),
+    IQ=base_stat(args.IQ, 20),
+    HT=base_stat(args.HT),
   }
   c.HP = valued_trait(c.ST.value, 0)
   c.Per = valued_trait(c.IQ.value, 0)
