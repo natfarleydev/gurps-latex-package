@@ -136,17 +136,13 @@ Running "make install" installs the files in the local TeX tree.
 %
 % ==== Put descriptive text here. ====
 %
-% \DescribeMacro{\dummyMacro}
-% This macro does nothing.\index{doing nothing|usage} It is merely an
-% example.  If this were a real macro, you would put a paragraph here
-% describing what the macro is supposed to do, what its mandatory and
-% optional arguments are, and so forth.
-%
-% \DescribeEnv{dummyEnv}
-% This environment does nothing.  It is merely an example.
-% If this were a real environment, you would put a paragraph here
-% describing what the environment is supposed to do, what its
-% mandatory and optional arguments are, and so forth.
+% \DescribeMacro{\gurps}
+% The SJGames online policy asks that \textbf{\textit{GURPS}} is always bold and
+% italicised, so this command provides the correct
+% formatting.
+% 
+% \DescribeEnv{character}
+% Yep. Makes a character
 %
 %\StopEventually{^^A
 %  \PrintChanges
@@ -291,7 +287,7 @@ Running "make install" installs the files in the local TeX tree.
 \NewDocumentCommand\skill{mom}{%
   \IfNoValueTF{#2}
   {\luadirect{character.skills[ [[#1]] ] = valued_trait(#3)}}
-  {% \luadirect{character.skills["#1"] = valued_trait(#3)}
+  {%
     \luadirect{
       x = split( [[#2]] )
       points = calculate_skill_points(x[1], x[2], #3)
