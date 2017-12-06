@@ -158,17 +158,80 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 %<*package>
 \RequirePackage{xparse}
+\RequirePackage{xspace}
 \RequirePackage{luacode}
+
+\RequirePackage{hyperref}
 
 \luadirect{require("gurps.lua")}
 %    \end{macrocode}
-% \begin{macro}{\dummyMacro}
-% This is a dummy macro.  If it did anything, we'd describe its
-% implementation here.
+% \begin{macro}{\gurps}
+% Steve Jackson Games asks that the name \textbf{\textit{GURPS}} is always in
+% bold and italicised. This macro provides that.
 %    \begin{macrocode}
-\newcommand{\dummyMacro}{}
+\NewDocumentCommand{\gurps}{s}{%
+    \IfBooleanTF#1
+    % With star
+    {\href{http://www.sjgames.com/gurps/}{\textbf{\textit{GURPS}}\xspace}}
+    % Without star
+    {\textbf{\textit{GURPS}}\xspace}%
+}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\SteveJacksonGames}
+%    \begin{macrocode}
+\NewDocumentCommand{\SteveJacksonGames}{s}{%
+    \IfBooleanTF#1%
+    % With star
+    {\href{http://www.sjgames.com/}{Steve~Jackson~Games\xspace}}%
+    % Without star
+    {Steve~Jackson~Games\xspace}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\SJGamesOnlinePolicyDisclaimer}
+%    \begin{macrocode}
+\NewDocumentCommand{\SJGamesOnlinePolicyDisclaimer}{}{%
+  The material presented here is my original creation, intended for use with the
+  \gurps* system from \SteveJacksonGames*. This material is not official and is
+  not endorsed by \SteveJacksonGames.
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\SJGamesOnlinePolicyDisclaimer}
+% The disclaimer \emph{almost} as it appears on the online policy. The words
+% `the art' have been removed since by default no art (including logos) are
+% included in \LaTeX{} documents.
+%    \begin{macrocode}
+\NewDocumentCommand{\SJGamesOnlinePolicyNotice}{}{%
+  \gurps* is a registered trademark of \SteveJacksonGames, and is copyrighted by
+  \SteveJacksonGames. All rights are reserved by SJ Games. This material is used
+  here in accordance with the SJ Games
+  \href{http://www.sjgames.com/general/online_policy.html}{online policy}.
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\SJGamesOnlinePolicyGameAid}
+% This text is required for all game aid's produced for \textbf{\textit{GURPS}} but without an
+% official license. It takes one argument: author name.
+%    \begin{macrocode}
+\NewDocumentCommand{\SJGamesOnlinePolicyGameAid}{m}{%
+  \gurps is a trademark of \SteveJacksonGames, and its rules and art are copyrighted
+  by \SteveJacksonGames. All rights are reserved by \SteveJacksonGames. This game
+  aid is the original creation of #1 and is released for free distribution, and
+  not for resale, under the permissions granted in the \href{http://www.sjgames.com/general/online_policy.html}{\SteveJacksonGames Online Policy}.
+}
+%    \end{macrocode}
+% \end{macro}
+
+% % \begin{macro}{\dummyMacro}
+% % This is a dummy macro.  If it did anything, we'd describe its
+% % implementation here.
+% %    \begin{macrocode}
+% \newcommand{\dummyMacro}{}
+% %    \end{macrocode}
+% % \end{macro}
 %
 % \begin{environment}{character}
 % This environment defines a `character' i.e.~anything with full stats. It takes
@@ -227,12 +290,12 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\skill{mom}{%
   \IfNoValueTF{#2}
-  {\luadirect{character.skills["#1"] = valued_trait(#3)}}
+  {\luadirect{character.skills[ [[#1]] ] = valued_trait(#3)}}
   {% \luadirect{character.skills["#1"] = valued_trait(#3)}
     \luadirect{
-      x = split("#2")
+      x = split( [[#2]] )
       points = calculate_skill_points(x[1], x[2], #3)
-      character.skills["#1"] = valued_trait(#3, points)
+      character.skills[ [[#1]] ] = valued_trait(#3, points)
     }
   }
 }
