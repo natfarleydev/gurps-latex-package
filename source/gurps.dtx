@@ -297,6 +297,22 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\spell}
+%    \begin{macrocode}
+\NewDocumentCommand\spell{mom}{%
+  \IfNoValueTF{#2}
+  {\luadirect{character.spells[ [[#1]] ] = valued_trait(#3)}}
+  {%
+    \luadirect{
+      x = split( [[#2]] )
+      -- TODO fix this to be spell points vv
+      points = calculate_skill_points(x[1], x[2], #3)
+      character.spells[ [[#1]] ] = valued_trait(#3, points)
+    }
+  }
+}
+%    \end{macrocode}
+% \end{macro}
 %    \begin{macrocode}
 \endinput
 %</package>
