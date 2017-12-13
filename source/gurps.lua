@@ -1,3 +1,23 @@
+function print_dice(dice_no, modifier)
+  tex.sprint([[\mbox{]])
+  tex.sprint(dice_no .. "d")
+
+  -- If `modifier` is a valid number
+  local modifier_number = tonumber(modifier)
+  if modifier_number then
+    if modifier_number > 0 then
+      tex.sprint("+" .. modifier_number)
+    elseif modifier_number < 0 then
+      tex.sprint("-" .. modifier_number)
+    -- else, don't print anything
+    end
+  -- elseif `modifier` is non-nil
+  elseif modifier then
+    tex.sprint("+" .. modifier)
+  end
+  tex.sprint("}")
+end
+
 function valued_trait(value, points)
   return {
     value=value,

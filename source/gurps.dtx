@@ -155,6 +155,7 @@ Running "make install" installs the files in the local TeX tree.
 %<*package>
 \RequirePackage{xparse}
 \RequirePackage{xspace}
+\RequirePackage{etex}
 \RequirePackage{luacode}
 
 \RequirePackage{hyperref}
@@ -171,6 +172,13 @@ Running "make install" installs the files in the local TeX tree.
     {\href{http://www.sjgames.com/gurps/}{\textbf{\textit{GURPS}}\xspace}}
     % Without star
     {\textbf{\textit{GURPS}}\xspace}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\dice}
+%    \begin{macrocode}
+\NewDocumentCommand{\dice}{mO{0}}{%
+  \luadirect{print_dice([[#1]], [[#2]])}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -268,16 +276,35 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{}}{%
-  \luadirect{character.advantages[ [[#1]] ] = trait(#2)}
+  \luadirect{character.advantages[ [[\unexpanded{#1}]] ] = trait(#2)}
 }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\disadvantage}
-% Adds an advantage to a character. NOTE: this only works in a |character| or
+% Adds a disadvantage to a character. NOTE: this only works in a |character| or
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\disadvantage}{mO{}}{%
-  \luadirect{character.disadvantages[ [[#1]] ] = trait(#2)}
+  \luadirect{character.disadvantages[ [[\unexpanded{#1}]] ] = trait(#2)}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\levelledadvantage}
+% Adds an advantage to a character. NOTE: this only works in a |character| or
+% |lens| environment.
+%    \begin{macrocode}
+% TODO finish this!
+\NewDocumentCommand{\levelledadvantage}{mmO{nil}}{%
+  \luadirect{character.advantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\levelleddisadvantage}
+% Adds a disadvantage to a character. NOTE: this only works in a |character| or
+% |lens| environment.
+%    \begin{macrocode}
+\NewDocumentCommand{\levelleddisadvantage}{mmO{nil}}{%
+  \luadirect{character.disadvantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -286,12 +313,12 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\skill{mom}{%
   \IfNoValueTF{#2}
-  {\luadirect{character.skills[ [[#1]] ] = valued_trait(#3)}}
+  {\luadirect{character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
   {%
     \luadirect{
       x = split( [[#2]] )
       points = calculate_skill_points(x[1], x[2], #3)
-      character.skills[ [[#1]] ] = valued_trait(#3, points)
+      character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
     }
   }
 }
@@ -301,13 +328,13 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\spell{mom}{%
   \IfNoValueTF{#2}
-  {\luadirect{character.spells[ [[#1]] ] = valued_trait(#3)}}
+  {\luadirect{character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
   {%
     \luadirect{
       x = split( [[#2]] )
       -- TODO fix this to be spell points vv
       points = calculate_skill_points(x[1], x[2], #3)
-      character.spells[ [[#1]] ] = valued_trait(#3, points)
+      character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
     }
   }
 }
