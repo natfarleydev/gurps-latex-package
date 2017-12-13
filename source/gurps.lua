@@ -11,12 +11,6 @@ function trait(points)
   }
 end
 
-function vantage(points)
-  return {
-    points=points or "?"
-  }
-end
-
 function base_stat(stat, multiplier, default)
   default = default or 10
   stat = stat or default
@@ -46,16 +40,16 @@ function create_character(args)
   -- Creates a character
   local args = args or {}
   local c = {}
-  c.base = {
+  c.base_stats = {
     ST=base_stat(args.ST),
     DX=base_stat(args.DX, 20),
     IQ=base_stat(args.IQ, 20),
     HT=base_stat(args.HT),
   }
-  c.base.HP = valued_trait(c.base.ST.value, 0)
-  c.base.Per = valued_trait(c.base.IQ.value, 0)
-  c.base.Will = valued_trait(c.base.IQ.value, 0)
-  c.base.FP = valued_trait(c.base.HT.value, 0)
+  c.base_stats.HP = valued_trait(c.base_stats.ST.value, 0)
+  c.base_stats.Per = valued_trait(c.base_stats.IQ.value, 0)
+  c.base_stats.Will = valued_trait(c.base_stats.IQ.value, 0)
+  c.base_stats.FP = valued_trait(c.base_stats.HT.value, 0)
 
   c.advantages = {}
   c.disadvantages = {}
@@ -71,10 +65,7 @@ character = create_character()
 
 function count_points()
   running_total = 0
-  -- for i,base_stat in pairs(base_stats) do
-  --   running_total = running_total + character[base_stat].points
-  -- end
-  for i,traits in pairs({"base",
+  for i,traits in pairs({"base_stats",
                          "advantages",
                          "disadvantages",
                          "skills",
@@ -118,7 +109,7 @@ function print_character()
   tex.print([[\paragraph{Base stats}]])
   local x = {}
   for i, base_stat in ipairs(base_stats) do
-    local obj = character.base[base_stat]
+    local obj = character.base_stats[base_stat]
     table.insert(
       x,
       base_stat .. [[~]] .. obj.value
@@ -139,7 +130,7 @@ function print_character_as_lens()
   tex.print([[\paragraph{Base stats}]])
   local x = {}
   for i, base_stat in ipairs(base_stats) do
-    local obj = character.base[base_stat]
+    local obj = character.base_stats[base_stat]
     if obj.value ~= 10 then
       table.insert(
         x,
@@ -158,17 +149,16 @@ function print_character_as_lens()
   if next(character.skills) ~= nil then
     print_little_section("Skills", character.skills)
   end
+  if next(character.spells) ~= nil then
+    print_little_section("Spells", character.spells)
+  end
 end
 
 
--- for i,v in ipairs(base_stats) do
---   -- \setST[10]{10}
---   tex.print([[\newcommand\set]] 
---       .. v
---       .. [[[1]{\luadirect{print(character.ST) character[]] .. v 
---       .. [[] = base_stat(#1)}}]])
-
-
+-- Creates a new LaTeX command
+-- 
+-- TODO move this to the dtx file because that's where documentation for LaTeX
+-- files lives
 function print_set_cmd(name, extra_args)
   extra_args = extra_args or {"nil"}
   tex.print(
@@ -186,12 +176,10 @@ print_set_cmd("ST")
 print_set_cmd("DX", {"20"})
 print_set_cmd("IQ", {"20"})
 print_set_cmd("HT")
-print_set_cmd("HP", {"5", "character.ST.value"})
-print_set_cmd("Per", {"5", "character.IQ.value"})
-print_set_cmd("Will", {"5", "character.IQ.value"})
-print_set_cmd("FP", {"5", "character.HT.value"})
-
--- tex.print([[\newcommand\setHP[1]{\luadirect{character.setHP = base_stat(#1, 5, character.ST.value)}}]])
+print_set_cmd("HP", {"5", "character.base_stats.ST.value"})
+print_set_cmd("Per", {"5", "character.base_stats.IQ.value"})
+print_set_cmd("Will", {"5", "character.base_stats.IQ.value"})
+print_set_cmd("FP", {"5", "character.base_stats.HT.value"})
 
 --- Splits string (on / by default)
 function split(s, split_on)
@@ -219,7 +207,7 @@ function calculate_skill_points(based_on, difficulty, skill_level)
   end
 
   -- TODO make support for non-base stat based_on values
-  local relative_level = skill_level - character.base[based_on].value
+  local relative_level = skill_level - character.base_stats[based_on].value
   if relative_level == (0 - difficulty_modifier) then
     return 1
   elseif relative_level == (1 - difficulty_modifier) then

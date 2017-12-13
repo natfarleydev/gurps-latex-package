@@ -268,7 +268,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{}}{%
-  \luadirect{character.advantages[ [[#1]] ] = vantage(#2)}
+  \luadirect{character.advantages[ [[#1]] ] = trait(#2)}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -277,7 +277,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\disadvantage}{mO{}}{%
-  \luadirect{character.disadvantages[ [[#1]] ] = vantage(#2)}
+  \luadirect{character.disadvantages[ [[#1]] ] = trait(#2)}
 }
 %    \end{macrocode}
 % \end{macro}
