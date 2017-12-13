@@ -24,6 +24,24 @@ function base_stat(stat, multiplier, default)
   return valued_trait(stat, (stat - default)*multiplier)
 end
 
+-- Creates an attack table.
+function attack(stat, damage, based_on)
+  rettable = {
+    stat=stat or "?",
+    damage=damage or "?",
+    based_on=based_on or "?"
+  }
+
+  -- i.e. if it's based on a real stat and that stat is a skill
+  if based_on ~= "?" and character.skills[based_on] then
+    rettable.adjustment = character.skills[based_on] - stat
+  elseif based_on ~= "?" and character.spells[based_on] then
+    rettable.adjustment = character.spells[based_on] - stat
+  end
+
+  return rettable
+end
+
 function create_character(args)
   -- Creates a character
   local args = args or {}
