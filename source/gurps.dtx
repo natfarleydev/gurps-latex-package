@@ -176,6 +176,10 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\dice}
+% Notates dice in the \gurps way (e.g. drops the |6| from |d6|) and puts it in %
+% an |\mbox|. First argument number of dice. Second argument is a modifier and
+% optional. E.g.~|\dice{3}[1]|
+% creates \mbox{3d+1}.
 %    \begin{macrocode}
 \NewDocumentCommand{\dice}{mO{0}}{%
   \luadirect{print_dice([[#1]], [[#2]])}%
@@ -221,22 +225,17 @@ Running "make install" installs the files in the local TeX tree.
 % official license. It takes one argument: author name.
 %    \begin{macrocode}
 \NewDocumentCommand{\SJGamesOnlinePolicyGameAid}{m}{%
-  \gurps is a trademark of \SteveJacksonGames, and its rules and art are copyrighted
-  by \SteveJacksonGames. All rights are reserved by \SteveJacksonGames. This game
-  aid is the original creation of #1 and is released for free distribution, and
-  not for resale, under the permissions granted in the \href{http://www.sjgames.com/general/online_policy.html}{\SteveJacksonGames Online Policy}.
+  \gurps is a trademark of \SteveJacksonGames, and its rules and art are
+  copyrighted by \SteveJacksonGames. All rights are reserved by
+  \SteveJacksonGames. This game aid is the original creation of #1 and
+  is released for free distribution, and not for resale, under the
+  permissions granted in the
+  \href{http://www.sjgames.com/general/online_policy.html}%
+        {\SteveJacksonGames Online Policy}.
 }
 %    \end{macrocode}
 % \end{macro}
 
-% % \begin{macro}{\dummyMacro}
-% % This is a dummy macro.  If it did anything, we'd describe its
-% % implementation here.
-% %    \begin{macrocode}
-% \newcommand{\dummyMacro}{}
-% %    \end{macrocode}
-% % \end{macro}
-%
 % \begin{environment}{character}
 % This environment defines a `character' i.e.~anything with full stats. It takes
 % one argument which is passed verbatim to lua.
