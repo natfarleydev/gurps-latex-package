@@ -3,6 +3,7 @@ function print_dice(dice_no, modifier)
   tex.sprint(dice_no .. "d")
 
   -- If `modifier` is a valid number
+
   local modifier_number = tonumber(modifier)
   if modifier_number then
     if modifier_number > 0 then
@@ -22,6 +23,12 @@ function valued_trait(value, points)
   return {
     value=value,
     points=points or "?"
+  }
+end
+
+function value(value)
+  return {
+    value=value
   }
 end
 
@@ -60,16 +67,27 @@ function create_character(args)
   -- Creates a character
   local args = args or {}
   local c = {}
+
+  c.pointless_stats = {}
+  c.pointless_stats.DR = value(args.DR or 0)
+  c.pointless_stats.SM = value(args.SM or 0)
+
   c.base_stats = {
-    ST=base_stat(args.ST),
+    ST=base_stat(args.ST, 10 - c.pointless_stats.SM.value),
     DX=base_stat(args.DX, 20),
     IQ=base_stat(args.IQ, 20),
     HT=base_stat(args.HT),
   }
-  c.base_stats.HP = valued_trait(c.base_stats.ST.value, 0)
-  c.base_stats.Per = valued_trait(c.base_stats.IQ.value, 0)
-  c.base_stats.Will = valued_trait(c.base_stats.IQ.value, 0)
-  c.base_stats.FP = valued_trait(c.base_stats.HT.value, 0)
+
+  -- Gets the value for a base stat
+  function gv(c, key)
+    return c.base_stats[key].value
+  end
+
+  c.base_stats.HP = base_stat(args.HP or gv(c, "ST"), 5, gv(c, "ST"))
+  c.base_stats.Per = base_stat(args.Per or gv(c, "IQ"), 5, gv(c, "IQ"))
+  c.base_stats.Will = base_stat(args.Will or gv(c, "IQ"), 5, gv(c, "IQ"))
+  c.base_stats.FP = base_stat(args.FP or gv(c, "HT"), 5, gv(c, "HT"))
 
   c.advantages = {}
   c.disadvantages = {}
@@ -107,6 +125,8 @@ function print_little_section(title, tbl)
   for k,v in pairs(tbl) do
     if v.value == nil then
       table.insert(x, k .. "[" .. v.points .. "]")
+    elseif v.points == nil then
+        table.insert(x, k .. "~" .. v.value)
     else
       table.insert(x, k .. "~" .. v.value .. "[" .. v.points .. "]")
     end
@@ -136,6 +156,8 @@ function print_character()
         .. "[" .. obj.points .. "]")
   end
   tex.print(table.concat(x, ", ") .. ".")
+
+  print_little_section("Other", character.pointless_stats)
 
   print_little_section("Advantages", character.advantages)
   print_little_section("Disadvantages", character.disadvantages)
