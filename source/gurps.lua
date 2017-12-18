@@ -1,3 +1,25 @@
+require "gurps_tables"
+
+function thrust_or_swing(typ, st)
+  if st < 1 then
+    return "0"
+  end
+
+  if _GTHRUSTSWINGTABLE[typ][st] then
+    return _GTHRUSTSWINGTABLE[typ][st]
+  else
+    return thrust_or_swing(typ, st - 1)
+  end
+end
+
+function thrust(st)
+  return thrust_or_swing("thrust", st)
+end
+
+function swing(st)
+  return thrust_or_swing("swing", st)
+end
+
 function print_dice(dice_no, modifier)
   tex.sprint([[\mbox{]])
   tex.sprint(dice_no .. "d")
@@ -83,6 +105,9 @@ function create_character(args)
   function gv(c, key)
     return c.base_stats[key].value
   end
+
+  c.pointless_stats.thr = value(thrust(gv(c, "ST")))
+  c.pointless_stats.sw = value(swing(gv(c, "ST")))
 
   c.base_stats.HP = base_stat(args.HP or gv(c, "ST"), 5, gv(c, "ST"))
   c.base_stats.Per = base_stat(args.Per or gv(c, "IQ"), 5, gv(c, "IQ"))

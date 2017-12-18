@@ -21,11 +21,14 @@ inst: all
 	cp $(NAME).dtx $(UTREE)/source/latex/$(NAME)
 	cp $(NAME).sty $(UTREE)/tex/latex/$(NAME)
 	cp $(NAME).lua $(UTREE)/tex/latex/$(NAME)
+	cp gurps_tables.lua $(UTREE)/tex/latex/$(TABLE_NAME)
 	cp $(NAME).pdf $(UTREE)/doc/latex/$(NAME)
 install: all
 	sudo mkdir -p $(LOCAL)/{tex,source,doc}/latex/$(NAME)
 	sudo cp $(NAME).dtx $(LOCAL)/source/latex/$(NAME)
 	sudo cp $(NAME).sty $(LOCAL)/tex/latex/$(NAME)
+	sudo cp $(NAME).lua $(UTREE)/tex/latex/$(NAME)
+	sudo cp gurps_tables.lua $(UTREE)/tex/latex/$(NAME)
 	sudo cp $(NAME).pdf $(LOCAL)/doc/latex/$(NAME)
 zip: all
 	ln -sf . $(NAME)
