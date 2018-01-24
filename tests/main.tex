@@ -7,7 +7,10 @@
 sided dice which are notated as \dice{$n$}[$m$], e.g. \dice{3}, \dice{4}[0], \dice{2}[-1], \dice{7}[+11].
 
 % Look ma, random ordering of keyword arguments, and missing arguments!
-\begin{character}{ST=11, IQ=12, DX=8}
+\begin{character}
+  \ST{11}
+  \IQ{12}
+  \DX{8}
   \advantage{\LaTeX{} skills}[15]
   \disadvantage{Bugs}
   \levelledadvantage{\TeX{} wizardry}{3}
@@ -15,13 +18,13 @@ sided dice which are notated as \dice{$n$}[$m$], e.g. \dice{3}, \dice{4}[0], \di
   \spell{\texttt{\char`\\ unexpanded}}{16}
 \end{character}
 
-\begin{lens}{ST=11, IQ=12, DX=8}
-  \advantage{\LaTeX{} skills}[15]
-  \disadvantage{Bugs}
-  \levelledadvantage{\TeX{} wizardry}{3}
-  \skill{Computer Operations (\LaTeX{})}[IQ/Hard]{16}
-  \spell{\texttt{\char`\\ unexpanded}}{16}
-\end{lens}
+% \begin{lens}{ST=11, IQ=12, DX=8}
+%   \advantage{\LaTeX{} skills}[15]
+%   \disadvantage{Bugs}
+%   \levelledadvantage{\TeX{} wizardry}{3}
+%   \skill{Computer Operations (\LaTeX{})}[IQ/Hard]{16}
+%   \spell{\texttt{\char`\\ unexpanded}}{16}
+% \end{lens}
 
 \section{Various disclaimers}
 \label{sec:various-disclaimers}

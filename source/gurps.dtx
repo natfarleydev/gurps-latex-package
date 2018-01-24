@@ -236,11 +236,39 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
+% \begin{macro}{\ST}
+% Sets the strength of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\ST}{m}{\luadirect{_ARGS.ST = #1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\DX}
+% Sets the dexterity of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\DX}{m}{\luadirect{_ARGS.DX = #1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\IQ}
+% Sets the IQ of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\IQ}{m}{\luadirect{_ARGS.IQ = #1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\HT}
+% Sets the health of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\HT}{m}{\luadirect{_ARGS.HT = #1}}
+%    \end{macrocode}
+% \end{macro}
+
 % \begin{environment}{character}
 % This environment defines a `character' i.e.~anything with full stats. It takes
 % one argument which is passed verbatim to lua.
 %    \begin{macrocode}
-\newenvironment{character}[1]{%
+\NewDocumentEnvironment{character}{}{%
 %    \end{macrocode}
 % \changes{v1.00a}{2017/12/04}{Added a spurious change log entry to
 %   show what a change \emph{within} an environment definition looks
@@ -249,11 +277,18 @@ Running "make install" installs the files in the local TeX tree.
 % which is reused every time a new environment is made. All configuration of the
 % character is made after this point
 %    \begin{macrocode}
-  \luadirect{character = create_character({#1})}%
+\luadirect{_ARGS = {
+    advantages={},
+    disadvantages={},
+    skills={},
+    spells={}
+  }}
+  % \luadirect{character = create_character({#1})}%
 }{%
 %    \end{macrocode}
 % At the end of the environment, the character is printed (via lua's |tex.print|).
 %    \begin{macrocode}
+  \luadirect{character = create_character(_ARGS)}
   \luadirect{print_character()}
 }
 %    \end{macrocode}
@@ -275,7 +310,8 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{}}{%
-  \luadirect{character.advantages[ [[\unexpanded{#1}]] ] = trait(#2)}
+  % \luadirect{character.advantages[ [[\unexpanded{#1}]] ] = trait(#2)}
+  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait(#2)}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -284,7 +320,8 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\disadvantage}{mO{}}{%
-  \luadirect{character.disadvantages[ [[\unexpanded{#1}]] ] = trait(#2)}
+  % \luadirect{character.disadvantages[ [[\unexpanded{#1}]] ] = trait(#2)}
+  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = trait(#2)}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -294,7 +331,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 % TODO finish this!
 \NewDocumentCommand{\levelledadvantage}{mmO{nil}}{%
-  \luadirect{character.advantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}
+  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -303,7 +340,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\levelleddisadvantage}{mmO{nil}}{%
-  \luadirect{character.disadvantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}
+  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -312,14 +349,26 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\skill{mom}{%
   \IfNoValueTF{#2}
-  {\luadirect{character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
+  % {\luadirect{character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
+  {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {value=#3}}}
   {%
     \luadirect{
-      x = split( [[#2]] )
-      points = calculate_skill_points(x[1], x[2], #3)
-      character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
+      % x = split( [[#2]] )
+      % -- TODO fix this to be spell points vv
+      % points = calculate_skill_points(x[1], x[2], #3)
+      % character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
+      _ARGS.skills[ [[\unexpanded{#1}]] ] = {value=#3, difficulty=[[#2]]}
     }
   }
+  % \IfNoValueTF{#2}
+  % {\luadirect{character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
+  % {%
+  %   \luadirect{
+  %     x = split( [[#2]] )
+  %     points = calculate_skill_points(x[1], x[2], #3)
+  %     character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
+  %   }
+  % }
 }
 %    \end{macrocode}
 % \end{macro}
@@ -327,13 +376,15 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\spell{mom}{%
   \IfNoValueTF{#2}
-  {\luadirect{character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
+  % {\luadirect{character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
+  {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3}}}
   {%
     \luadirect{
-      x = split( [[#2]] )
-      -- TODO fix this to be spell points vv
-      points = calculate_skill_points(x[1], x[2], #3)
-      character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
+      % x = split( [[#2]] )
+      % -- TODO fix this to be spell points vv
+      % points = calculate_skill_points(x[1], x[2], #3)
+      % character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
+      _ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3, difficulty=[[#2]]}
     }
   }
 }

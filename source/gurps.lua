@@ -114,16 +114,39 @@ function create_character(args)
   c.base_stats.Will = base_stat(args.Will or gv(c, "IQ"), 5, gv(c, "IQ"))
   c.base_stats.FP = base_stat(args.FP or gv(c, "HT"), 5, gv(c, "HT"))
 
-  c.advantages = {}
-  c.disadvantages = {}
+  -- c.advantages = {}
+  -- c.disadvantages = {}
+  c.advantages = args.advantages
+  c.disadvantages = args.disadvantages
+  -- TODO abstract the logic for spells into general skills
   c.skills = {}
+  for name,obj in pairs(args.skills) do
+    if obj.difficulty then
+      x = split(obj.difficulty)
+      -- TODO fix this to be spell points vv
+      points = calculate_skill_points(c, x[1], x[2], obj.value)
+      c.skills[name] = valued_trait(obj.value, points)
+    else
+      c.skills[name] = valued_trait(obj.value)
+    end
+  end
   c.spells = {}
+  for name,obj in pairs(args.spells) do
+    if obj.difficulty then
+      x = split(obj.difficulty)
+      -- TODO fix this to be spell points vv
+      points = calculate_skill_points(c, x[1], x[2], obj.value)
+      c.spells[name] = valued_trait(obj.value, points)
+    else
+      c.spells[name] = valued_trait(obj.value)
+    end
+  end
   c.attacks = {}
 
   return c
 end
 
-character = create_character()
+-- character = create_character()
 
 
 function count_points()
@@ -133,9 +156,11 @@ function count_points()
                          "disadvantages",
                          "skills",
                          "spells"}) do
-    for j,v in pairs(character[traits]) do
-      if v.points ~= "?" then
-        running_total = running_total + v.points
+    if character[traits] then
+      for j,v in pairs(character[traits]) do
+        if v.points ~= "?" then
+          running_total = running_total + v.points
+        end
       end
     end
   end
@@ -259,7 +284,7 @@ function split(s, split_on)
 end
 
 
-function calculate_skill_points(based_on, difficulty, skill_level)
+function calculate_skill_points(character, based_on, difficulty, skill_level)
   -- TODO rename this variable
   if difficulty == "Easy" then
     difficulty_modifier = 0
