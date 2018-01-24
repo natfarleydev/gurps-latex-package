@@ -264,18 +264,44 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
+% \begin{macro}{\HP}
+% Sets the HP of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\HP}{m}{\luadirect{_ARGS.HP = #1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\Per}
+% Sets the perception of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\Per}{m}{\luadirect{_ARGS.Per = #1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\Will}
+% Sets the will of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\Will}{m}{\luadirect{_ARGS.Will = #1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\FP}
+% Sets the FP of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\FP}{m}{\luadirect{_ARGS.FP = #1}}
+%    \end{macrocode}
+% \end{macro}
+
 % \begin{environment}{character}
-% This environment defines a `character' i.e.~anything with full stats. It takes
-% one argument which is passed verbatim to lua.
+% This environment defines a `character' i.e.~anything with full stats.
 %    \begin{macrocode}
 \NewDocumentEnvironment{character}{}{%
 %    \end{macrocode}
-% \changes{v1.00a}{2017/12/04}{Added a spurious change log entry to
-%   show what a change \emph{within} an environment definition looks
-%   like.}
-% Initially, a new character is created. |character| is a global lua variable
-% which is reused every time a new environment is made. All configuration of the
-% character is made after this point
+% \changes{v1.00a}{2017/12/04}{Added a spurious change log entry to show what a
+% change \emph{within} an environment definition looks like.}
+%
+% The global lua variable |_ARGS| is created and then populated by commands
+% inside the environment.
 %    \begin{macrocode}
 \luadirect{_ARGS = {
     advantages={},
@@ -283,10 +309,10 @@ Running "make install" installs the files in the local TeX tree.
     skills={},
     spells={}
   }}
-  % \luadirect{character = create_character({#1})}%
 }{%
 %    \end{macrocode}
-% At the end of the environment, the character is printed (via lua's |tex.print|).
+% At the end of the environment, the character is initialised printed (via lua's
+% |tex.print|).
 %    \begin{macrocode}
   \luadirect{character = create_character(_ARGS)}
   \luadirect{print_character()}
@@ -310,7 +336,6 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{}}{%
-  % \luadirect{character.advantages[ [[\unexpanded{#1}]] ] = trait(#2)}
   \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait(#2)}
 }
 %    \end{macrocode}
@@ -320,7 +345,6 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\disadvantage}{mO{}}{%
-  % \luadirect{character.disadvantages[ [[\unexpanded{#1}]] ] = trait(#2)}
   \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = trait(#2)}
 }
 %    \end{macrocode}
@@ -349,26 +373,12 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\skill{mom}{%
   \IfNoValueTF{#2}
-  % {\luadirect{character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
   {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {value=#3}}}
   {%
     \luadirect{
-      % x = split( [[#2]] )
-      % -- TODO fix this to be spell points vv
-      % points = calculate_skill_points(x[1], x[2], #3)
-      % character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
       _ARGS.skills[ [[\unexpanded{#1}]] ] = {value=#3, difficulty=[[#2]]}
     }
   }
-  % \IfNoValueTF{#2}
-  % {\luadirect{character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
-  % {%
-  %   \luadirect{
-  %     x = split( [[#2]] )
-  %     points = calculate_skill_points(x[1], x[2], #3)
-  %     character.skills[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
-  %   }
-  % }
 }
 %    \end{macrocode}
 % \end{macro}
@@ -376,14 +386,9 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\spell{mom}{%
   \IfNoValueTF{#2}
-  % {\luadirect{character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3)}}
   {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3}}}
   {%
     \luadirect{
-      % x = split( [[#2]] )
-      % -- TODO fix this to be spell points vv
-      % points = calculate_skill_points(x[1], x[2], #3)
-      % character.spells[ [[\unexpanded{#1}]] ] = valued_trait(#3, points)
       _ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3, difficulty=[[#2]]}
     }
   }
