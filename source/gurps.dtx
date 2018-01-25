@@ -292,6 +292,20 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
+% \begin{macro}{\SM}
+% Sets the SM of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\SM}{m}{\luadirect{_ARGS.SM = #1}}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\DR}
+% Sets the DR of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\DR}{m}{\luadirect{_ARGS.DR = #1}}
+%    \end{macrocode}
+% \end{macro}
+
 % \begin{environment}{character}
 % This environment defines a `character' i.e.~anything with full stats.
 %    \begin{macrocode}
