@@ -12,10 +12,13 @@ $(NAME).pdf: $(NAME).dtx
 	if [ -f $(NAME).idx ]; then makeindex -q -s gind.ist -o $(NAME).ind $(NAME).idx; fi
 	lualatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
 	lualatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
+	chmod 444 README.md
 clean:
 	rm -f $(NAME).{aux,fls,glo,gls,hd,idx,ilg,ind,ins,log,out}
 distclean: clean
 	rm -f *.log
+	chmod +w README.md
+	rm README.md
 	rm -f $(NAME).{pdf,sty}
 inst: all
 	mkdir -p $(UTREE)/{tex,source,doc}/latex/$(NAME)
@@ -32,6 +35,9 @@ install: all
 	sudo cp gurps_tables.lua $(UTREE)/tex/latex/$(NAME)
 	sudo cp $(NAME).pdf $(LOCAL)/doc/latex/$(NAME)
 zip: all
+	chmod 664 README.md
 	ln -sf . $(NAME)
 	zip -Drq $(PWD)/$(NAME)-$(VERS).zip $(NAME)/{README.md,$(NAME).{pdf,dtx,lua},gurps_tables.lua}
 	rm $(NAME)
+	chmod 444 README.md
+

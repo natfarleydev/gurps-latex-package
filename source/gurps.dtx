@@ -8,19 +8,18 @@
 |-------:|------------------------------------------------------------------
 |  gurps:| A LaTeX package for GURPS typesetting                           |
 | Author:| Nathanael Farley                                                |
-| E-mail:| (not set)                                                       |
+| E-mail:| nasfarley88@gmail.com                                           |
 |License:| Released under the LaTeX Project Public License v1.3c or later  |
 |    See:| http://www.latex-project.org/lppl.txt                           |
 
+This package supports typesetting Generic Universal Role Playing System (GURPS) materials. It provides many convenience commands (e.g. `\gurps`, `\SJGamesOnlinePolicy`) as well as limited NPC building capabilities with a character environment.
 
-Short description:
-TODO this description.
+The package requires the use of LuaLaTeX as several of the internal calculations are in Lua. 
+
+----
 
 Disclaimer:
-The material presented here is my original creation, intended for use with the
-<a href="http://www.sjgames.com/gurps/"><b><i>GURPS</i></b></a> system from <a
-href="http://www.sjgames.com/">Steve Jackson Games</a>. This material is not
-official and is not endorsed by Steve Jackson Games.
+The material presented here is the original creation of Nathanael Farley, intended for use with the <a href="http://www.sjgames.com/gurps/"><b><i>GURPS</i></b></a> system from <a href="http://www.sjgames.com/">Steve Jackson Games</a>. This material is not official and is not endorsed by Steve Jackson Games.
 
 Notice:
 <a href="http://www.sjgames.com/gurps/"><b><i>GURPS</i></b></a> is a registered trademark of Steve Jackson Games, and is copyrighted by Steve Jackson Games. All rights are reserved by SJ Games. This material is used here in accordance with the SJ Games <a href="http://www.sjgames.com/general/online_policy.html">online policy</a>.
@@ -40,14 +39,14 @@ Notice:
 -------:| -----------------------------------------------------------------
   gurps:| A LaTeX package for GURPS typesetting
  Author:| Nathanael Farley
- E-mail:| (not set)
+ E-mail:| nasfarley88@gmail.com
 License:| Released under the LaTeX Project Public License v1.3c or later
     See:| http://www.latex-project.org/lppl.txt
 
 \endpreamble
 \postamble
 
-Copyright (C) 2017 by Nathanael Farley <(not set)>
+Copyright (C) 2017 by Nathanael Farley <nasfarley88@gmail.com>
 
 This work may be distributed and/or modified under the
 conditions of the LaTeX Project Public License (LPPL), either
@@ -97,7 +96,7 @@ Running "make install" installs the files in the local TeX tree.
 %<package>\NeedsTeXFormat{LaTeX2e}[1999/12/01]
 %<package>\ProvidesPackage{gurps}
 %<*package>
-    [2017/12/04 v0.1.1 A LaTeX package for GURPS typesetting]
+    [2018/02/14 v0.1.1 A LaTeX package for GURPS typesetting]
 %</package>
 %<*driver>
 \documentclass{ltxdoc}
@@ -130,7 +129,7 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{abstract}
 %   \textit{\textbf{GURPS}} is an excellent RPG system. \LaTeX{} is an excellent
 %   typesetting system. Together, they make excellent game aids. At least, they
-%   do with this package!
+%   can with this package!
 % \end{abstract}
 %
 % \section{Usage}
