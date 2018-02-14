@@ -32,5 +32,5 @@ install: all
 	sudo cp $(NAME).pdf $(LOCAL)/doc/latex/$(NAME)
 zip: all
 	ln -sf . $(NAME)
-	zip -Drq $(PWD)/$(NAME)-$(VERS).zip $(NAME)/{README.md,$(NAME).{pdf,dtx}}
+	zip -Drq $(PWD)/$(NAME)-$(VERS).zip $(NAME)/{README.md,$(NAME).{pdf,dtx,lua},gurps_tables.lua}
 	rm $(NAME)
