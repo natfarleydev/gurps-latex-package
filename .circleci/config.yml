@@ -1,0 +1,12 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: aergus/latex
+    steps:
+      - checkout
+      - run:
+          name: Make!
+          command: make
+      - store_artifacts:
+          path: ./tests/
