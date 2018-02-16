@@ -9,4 +9,4 @@ jobs:
           name: Make!
           command: make
       - store_artifacts:
-          path: ./tests/
+          path: .
