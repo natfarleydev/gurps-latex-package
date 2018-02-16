@@ -102,7 +102,15 @@ Running "make install" installs the files in the local TeX tree.
 \documentclass{ltxdoc}
 \usepackage[a4paper,margin=25mm,left=50mm,nohead]{geometry}
 \usepackage[numbered]{hypdoc}
+\usepackage{xparse}
 \usepackage{\jobname}
+
+\NewDocumentEnvironment{centerquote}{}{%
+  \begin{center}\begin{minipage}{0.8\linewidth}\centering%
+    }{%
+    \end{minipage}\end{center}%
+}
+
 \EnableCrossrefs
 \CodelineIndex
 \RecordChanges
@@ -133,17 +141,68 @@ Running "make install" installs the files in the local TeX tree.
 %   can with this package!
 % \end{abstract}
 %
-% \section{Usage}
 %
-% ==== Put descriptive text here. ====
+% \section{Motivation}
+%
+% I often like to make \gurps game aids for my own games. Over time, I started
+% to collect various macros that made it easier. Eventually, I had enough game
+% aids that I decided to write the macros up in a package, then I realised I
+% could release on CTAN and share the \gurps goodness!
+% 
+% \section{Usage}
+% The macros in this package can be divided into roughly three sections:
+% \begin{enumerate}
+% \item macros for abiding by SJGames online policy
+% \item common typographical features of \gurps
+% \item character creation
+% \end{enumerate}
+%
+%
+% \subsection{Online policy macros}
+% \label{sec:online-policy-macros}
+%
+% \DescribeMacro{\SJGamesOnlinePolicyDisclaimer}
+% \DescribeMacro{\SJGamesOnlinePolicyNotice}
+% \DescribeMacro{\SJGamesOnlinePolicyGameAid}
+% The macros \cs{SJGamesOnlinePolicyDisclaimer}, \cs{SJGamesOnlinePolicyNotice}
+% and \cs{SJGamesOnlinePolicyGameAid}\marg{author name} provide common
+% boilerplate statements taken directly from
+% \href{http://www.sjgames.com/general/online_policy.html}{SJGames online policy}
+% with small modifications to make them more suitable to game aids
+% created with \textsc{Lua}\LaTeX.
+% 
+% \DescribeMacro{\gurps}
+% The command \cs{gurps} is also included to provide bold and italicised \gurps
+% as requested in the online policy
+%
+%
+% \subsubsection{\cs{SJGamesOnlinePolicyDisclaimer} text}
+% Using the code |\SJGamesOnlinePolicyDisclaimer| produces the text:
+% 
+% \begin{centerquote}
+%   \SJGamesOnlinePolicyDisclaimer
+% \end{centerquote}
+% 
+% \subsubsection{\cs{SJGamesOnlinePolicyNotice} text}
+% Using the code |\SJGamesOnlinePolicyOnlineNotice| produces the text:
+%
+% \begin{centerquote}
+%   \SJGamesOnlinePolicyNotice
+% \end{centerquote}
+%
+% \subsubsection{\cs{SJGamesOnlinePolicyGameAid} text}
+% Using the code |\SJGamesOnlinePolicyGameAid{NAME}| produces the text:
+% 
+% \begin{centerquote}
+%   \SJGamesOnlinePolicyGameAid{NAME}
+% \end{centerquote}
 %
 % \DescribeMacro{\gurps}
 % The SJGames online policy asks that \textbf{\textit{GURPS}} is always bold and
-% italicised, so this command provides the correct
-% formatting.
+% italicised, so this command provides the correct formatting.
 % 
 % \DescribeEnv{character}
-% Yep. Makes a character
+% Makes a character
 %
 %\StopEventually{^^A
 %  \PrintChanges
