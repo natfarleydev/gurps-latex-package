@@ -103,6 +103,7 @@ Running "make install" installs the files in the local TeX tree.
 \usepackage[a4paper,margin=25mm,left=50mm,nohead]{geometry}
 \usepackage[numbered]{hypdoc}
 \usepackage{xparse}
+\usepackage{tcolorbox}
 \usepackage{\jobname}
 
 \NewDocumentEnvironment{centerquote}{}{%
@@ -197,12 +198,59 @@ Running "make install" installs the files in the local TeX tree.
 %   \SJGamesOnlinePolicyGameAid{NAME}
 % \end{centerquote}
 %
-% \DescribeMacro{\gurps}
-% The SJGames online policy asks that \textbf{\textit{GURPS}} is always bold and
-% italicised, so this command provides the correct formatting.
-% 
+%
+% \section{Typographical features}
+% \label{sec:typographical-features}
+%
+% \DescribeMacro{\dice}
+% Using the \cs{dice}\marg{no.\ of dice}\oarg{modifier} provides dice notation
+% consistent with \gurps materials. E.g.
+%
+% \begin{center}
+%   |\dice{3}| \(\rightarrow\) \dice{3}\\
+%   |\dice{4}[-1]| \(\rightarrow\) \dice{4}[-1]\\
+%   |\dice{2}[1]| \(\rightarrow\) \dice{2}[1]
+% \end{center}
+%
+%
+% \section{Character creation}
+% \label{sec:character-creation}
+%
 % \DescribeEnv{character}
-% Makes a character
+% Character (i.e.~NPCs) creation can be tricky and involve a \emph{lot} of
+% boilerplate code. This package provides most of the boilerplate code so you
+% only specify what is \emph{different} from assumed values (e.g.~If your
+% character has a ST~13 but DX~10, IQ~10, HT~10, you only need to specify ST)
+%
+% It is not currently possible to (easily) change the look of the stats block
+% for the |character| environment. This is planned for a future release.
+%
+% \begin{tcolorbox}[title={\emph{Warning!}}]
+%   This feature is still in alpha. The external API (\cs{skill},
+%   \cs{advantage}, etc.) should not change, but the internal \TeX\ and layout
+%   is \emph{very} likely to change.
+% \end{tcolorbox}
+%
+% On to an example\footnote{Any resemblance to Napolean Dynamite is completely
+% \ldots{} intentional!}:
+%
+% \begin{verbatim}
+% \begin{character}
+%   \ST{9}
+%   \advantage{Natural afro}[1]
+%   \disadvantage{Big teeth}[-1]
+%   \skill{Nunchuck}[DX/Easy]{16}
+% \end{character}
+% \end{verbatim}
+%
+% creates \ldots{}
+%
+% \begin{character}
+%   \ST{9}
+%   \advantage{Natural afro}[1]
+%   \disadvantage{Big teeth}[-1]
+%   \skill{Nunchuck}[DX/Easy]{16}
+% \end{character}
 %
 %\StopEventually{^^A
 %  \PrintChanges
