@@ -35,6 +35,10 @@ install: all
 	sudo cp gurps_tables.lua $(UTREE)/tex/latex/$(NAME)
 	sudo cp $(NAME).pdf $(LOCAL)/doc/latex/$(NAME)
 zip: all
+  # Check if the latest release date has been updated
+	if grep -oP 1970/01/01 gurps.dtx; then echo -e '\033[0;31mRelease date needs updating!\033[0m'; exit 1; fi
+
+  # Make README.md readable before putting it into the zip file
 	chmod 664 README.md
 	ln -sf . $(NAME)
 	zip -Drq $(PWD)/$(NAME)-$(VERS).zip $(NAME)/{README.md,$(NAME).{pdf,dtx,lua},gurps_tables.lua}
