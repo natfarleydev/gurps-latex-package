@@ -12,13 +12,10 @@ $(NAME).pdf: $(NAME).dtx
 	if [ -f $(NAME).idx ]; then makeindex -q -s gind.ist -o $(NAME).ind $(NAME).idx; fi
 	lualatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
 	lualatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
-	chmod 444 README.md
 clean:
 	rm -f $(NAME).{aux,fls,glo,gls,hd,idx,ilg,ind,ins,log,out}
 distclean: clean
 	rm -f *.log
-	chmod +w README.md
-	rm README.md
 	rm -f $(NAME).{pdf,sty}
 inst: all
 	mkdir -p $(UTREE)/{tex,source,doc}/latex/$(NAME)
@@ -38,10 +35,7 @@ zip: all
   # Check if the latest release date has been updated
 	if grep -oP 1970/01/01 gurps.dtx; then echo -e '\033[0;31mRelease date needs updating!\033[0m'; exit 1; fi
 
-  # Make README.md readable before putting it into the zip file
-	chmod 664 README.md
 	ln -sf . $(NAME)
 	zip -Drq $(PWD)/$(NAME)-$(VERS).zip $(NAME)/{README.md,$(NAME).{pdf,dtx,lua},gurps_tables.lua}
 	rm $(NAME)
-	chmod 444 README.md
 
