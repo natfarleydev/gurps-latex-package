@@ -176,9 +176,9 @@ function print_little_section(title, tbl)
     if v.value == nil then
       table.insert(x, k .. "[" .. v.points .. "]")
     elseif v.points == nil then
-        table.insert(x, k .. "~" .. v.value)
+        table.insert(x, k .. [[~\rollagainst{]] .. v.value .. "}")
     else
-      table.insert(x, k .. "~" .. v.value .. "[" .. v.points .. "]")
+      table.insert(x, k .. [[~\rollagainst{]] .. v.value .. "}[" .. v.points .. "]")
     end
   end
 
@@ -208,7 +208,7 @@ function print_character()
     local obj = character.base_stats[base_stat]
     table.insert(
       x,
-      base_stat .. [[~]] .. obj.value
+      base_stat .. [[~\rollagainst{]] .. obj.value .. "}"
         .. "[" .. obj.points .. "]")
   end
   -- tex.print(table.concat(x, ", ") .. ".")

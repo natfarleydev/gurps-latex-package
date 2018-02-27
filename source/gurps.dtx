@@ -239,6 +239,8 @@ Running "make install" installs the files in the local TeX tree.
 \RequirePackage{xparse}
 \RequirePackage{xspace}
 \RequirePackage{luacode}
+\RequirePackage{tikz}
+\RequirePackage{calc}
 \PassOptionsToPackage{inline}{enumitem}
 \RequirePackage[inline]{enumitem}
 
@@ -267,6 +269,21 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand{\dice}{mO{0}}{%
   \luadirect{print_dice([[#1]], [[#2]])}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{rollagainst}
+% A number to roll against as \rollagainst{16} or \rollagainst{6}.
+%    \begin{macrocode}
+\NewDocumentCommand{\rollagainst}{m}{%
+  \textbf{#1}%
+  % \hspace{2pt}%
+  % \tikz[overlay]{%
+  %   \node[fill=black!20, text=black, inner sep=0pt, anchor=text, rectangle, rounded
+  %   corners=1mm, minimum size=width("16 ")] {\parbox{\widthof{16}}{\centering #1}};%
+  % }%
+  % \phantom{16}%
+  % \hspace{2pt}%
 }
 %    \end{macrocode}
 % \end{macro}
