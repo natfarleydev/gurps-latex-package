@@ -7,7 +7,7 @@ UTREE = $(shell kpsewhich --var-value TEXMFHOME)
 all:	$(NAME).pdf
 
 $(NAME).pdf: $(NAME).dtx
-	lualatex -shell-escape -recorder -interaction=batchmode $(NAME).dtx >/dev/null
+	lualatex -recorder -interaction=batchmode $(NAME).dtx >/dev/null
 	if [ -f $(NAME).glo ]; then makeindex -q -s gglo.ist -o $(NAME).gls $(NAME).glo; fi
 	if [ -f $(NAME).idx ]; then makeindex -q -s gind.ist -o $(NAME).ind $(NAME).idx; fi
 	lualatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null

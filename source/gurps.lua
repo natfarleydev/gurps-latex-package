@@ -169,7 +169,7 @@ end
 
 
 function print_little_section(title, tbl)
-  tex.print([[\paragraph{]] .. title .. [[}]])
+  tex.print([[\charactersection{]] .. title .. [[}]])
 
   local x = {}
   for k,v in pairs(tbl) do
@@ -185,7 +185,13 @@ function print_little_section(title, tbl)
   if next(tbl) == nil then
     table.insert(x, [[\ldots{}]])
   end
-  tex.print(table.concat(x, ", ") .. ".")
+
+  tex.print([[\begin{charactertraitlist}]])
+  for i,v in ipairs(x) do
+    tex.print([[\item ]] .. v)
+  end
+  tex.print([[\end{charactertraitlist}]])
+  -- tex.print(table.concat(x, ", ") .. ".")
 end
 
 
@@ -195,8 +201,8 @@ base_stats = {
 
 
 function print_character()
-  tex.print([[\subsubsection{Stats (]] .. count_points() .. [[~pt)}]])
-  tex.print([[\paragraph{Base stats}]])
+  tex.print([[\charactertitle{Stats (]] .. count_points() .. [[~pt)}]])
+  tex.print([[\charactersection{Base stats}]])
   local x = {}
   for i, base_stat in ipairs(base_stats) do
     local obj = character.base_stats[base_stat]
@@ -205,7 +211,12 @@ function print_character()
       base_stat .. [[~]] .. obj.value
         .. "[" .. obj.points .. "]")
   end
-  tex.print(table.concat(x, ", ") .. ".")
+  -- tex.print(table.concat(x, ", ") .. ".")
+  tex.print([[\begin{charactertraitlist}]])
+  for i,v in ipairs(x) do
+    tex.print([[\item ]] .. v)
+  end
+  tex.print([[\end{charactertraitlist}]])
 
   print_little_section("Other", character.pointless_stats)
 
