@@ -109,10 +109,11 @@ function create_character(args)
   c.pointless_stats.thr = value(thrust(gv(c, "ST")))
   c.pointless_stats.sw = value(swing(gv(c, "ST")))
 
-  c.base_stats.HP = base_stat(args.HP or gv(c, "ST"), 5, gv(c, "ST"))
+  -- TODO fix the double place this is defined
+  c.base_stats.HP = base_stat(args.HP or gv(c, "ST"), 2, gv(c, "ST"))
   c.base_stats.Per = base_stat(args.Per or gv(c, "IQ"), 5, gv(c, "IQ"))
   c.base_stats.Will = base_stat(args.Will or gv(c, "IQ"), 5, gv(c, "IQ"))
-  c.base_stats.FP = base_stat(args.FP or gv(c, "HT"), 5, gv(c, "HT"))
+  c.base_stats.FP = base_stat(args.FP or gv(c, "HT"), 3, gv(c, "HT"))
 
   -- c.advantages = {}
   -- c.disadvantages = {}
@@ -169,16 +170,16 @@ end
 
 
 function print_little_section(title, tbl)
-  tex.print([[\charactersection{]] .. title .. [[}]])
+  tex.sprint([[\charactersection{]] .. title .. [[}]])
 
   local x = {}
   for k,v in pairs(tbl) do
     if v.value == nil then
       table.insert(x, k .. "[" .. v.points .. "]")
     elseif v.points == nil then
-        table.insert(x, k .. [[~\rollagainst{]] .. v.value .. "}")
+        table.insert(x, k .. [[ ]] .. v.value)
     else
-      table.insert(x, k .. [[~\rollagainst{]] .. v.value .. "}[" .. v.points .. "]")
+      table.insert(x, k .. [[ ]] .. v.value .. "[" .. v.points .. "]")
     end
   end
 
@@ -186,11 +187,11 @@ function print_little_section(title, tbl)
     table.insert(x, [[\ldots{}]])
   end
 
-  tex.print([[\begin{charactertraitlist}]])
+  tex.sprint([[\begin{charactertraitlist}]])
   for i,v in ipairs(x) do
-    tex.print([[\item ]] .. v)
+    tex.sprint([[\item ]] .. v)
   end
-  tex.print([[\end{charactertraitlist}]])
+  tex.sprint([[\end{charactertraitlist}]])
   -- tex.print(table.concat(x, ", ") .. ".")
 end
 
@@ -201,22 +202,22 @@ base_stats = {
 
 
 function print_character()
-  tex.print([[\charactertitle{Stats (]] .. count_points() .. [[~pt)}]])
-  tex.print([[\charactersection{Base stats}]])
+  tex.sprint([[\charactertitle{Stats (]] .. count_points() .. [[~pt)}]])
+  tex.sprint([[\charactersection{Base stats}]])
   local x = {}
   for i, base_stat in ipairs(base_stats) do
     local obj = character.base_stats[base_stat]
     table.insert(
       x,
-      base_stat .. [[~\rollagainst{]] .. obj.value .. "}"
+      base_stat .. [[ ]] .. obj.value
         .. "[" .. obj.points .. "]")
   end
-  -- tex.print(table.concat(x, ", ") .. ".")
-  tex.print([[\begin{charactertraitlist}]])
+  -- tex.sprint(table.concat(x, ", ") .. ".")
+  tex.sprint([[\begin{charactertraitlist}]])
   for i,v in ipairs(x) do
-    tex.print([[\item ]] .. v)
+    tex.sprint([[\item ]] .. v)
   end
-  tex.print([[\end{charactertraitlist}]])
+  tex.sprint([[\end{charactertraitlist}]])
 
   print_little_section("Other", character.pointless_stats)
 

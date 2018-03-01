@@ -419,8 +419,8 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\charactersection}
 %   For sections in the the character stats block, we define |\charactersection|
 %    \begin{macrocode}
-\NewDocumentCommand{\charactersection}{m}{
-  \noindent\par\noindent\textbf{\large #1}\\\noindent
+\NewDocumentCommand{\charactersection}{m}{%
+  \noindent\par\noindent\textbf{\large #1}\\\noindent%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -429,11 +429,9 @@ Running "make install" installs the files in the local TeX tree.
 %  We define the |charactertraitlist| to list the traits. By default, this is an
 %  |itemize*| from the |enumitem| package with some customisations
 %    \begin{macrocode}
-\NewDocumentEnvironment{charactertraitlist}{}{%
-  \begin{itemize*}[itemjoin={{, }}, label=]%
-  }{%
-  \end{itemize*}%
-}
+\NewDocumentEnvironment{charactertraitlist}{}
+{\noindent\begin{itemize*}[itemjoin={{, }},label=,afterlabel={},midpenalty=0]}
+  {\end{itemize*}}
 %    \end{macrocode}
 % \end{environment}
 % \begin{environment}{character}
@@ -480,7 +478,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{}}{%
-  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait(#2)}
+  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait(#2)}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -489,7 +487,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\disadvantage}{mO{}}{%
-  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = trait(#2)}
+  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = trait(#2)}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -499,7 +497,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 % TODO finish this!
 \NewDocumentCommand{\levelledadvantage}{mmO{nil}}{%
-  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}
+  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -508,7 +506,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\levelleddisadvantage}{mmO{nil}}{%
-  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}
+  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -516,26 +514,26 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\skill}
 %    \begin{macrocode}
 \NewDocumentCommand\skill{mom}{%
-  \IfNoValueTF{#2}
-  {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {value=#3}}}
+  \IfNoValueTF{#2}%
+  {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {value=#3}}}%
   {%
-    \luadirect{
+    \luadirect{%
       _ARGS.skills[ [[\unexpanded{#1}]] ] = {value=#3, difficulty=[[#2]]}
-    }
-  }
+    }%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\spell}
 %    \begin{macrocode}
 \NewDocumentCommand\spell{mom}{%
-  \IfNoValueTF{#2}
-  {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3}}}
+  \IfNoValueTF{#2}%
+  {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3}}}%
   {%
-    \luadirect{
-      _ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3, difficulty=[[#2]]}
-    }
-  }
+    \luadirect{%
+      _ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3, difficulty=[[#2]]}%
+    }%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}
