@@ -1,5 +1,5 @@
 # gurps-latex-package
-![CircleCI status](https://circleci.com/gh/nasfarley88/gurps-latex-package.png?circle-token=8d0ab847c5fc6ed4fa9cf07aa5e167c24c322cb3)
+CircleCI status: ![CircleCI status](https://circleci.com/gh/nasfarley88/gurps-latex-package.png?circle-token=8d0ab847c5fc6ed4fa9cf07aa5e167c24c322cb3)
 
 A LaTeX package for aiding the creation of homemade GURPS resources.
 
