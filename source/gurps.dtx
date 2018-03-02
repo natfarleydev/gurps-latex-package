@@ -410,8 +410,15 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\charactertitle}
 %   As a title for the character stats block, we define |\charactertitle|
 %    \begin{macrocode}
-\NewDocumentCommand{\charactertitle}{m}{
-  \noindent\par\noindent\textbf{\Large #1}\\\noindent
+\newcounter{charactertitle} % to keep LaTeX happy
+\newcommand{\charactertitlemark}[1]{} % ditto
+\newcommand\charactertitle{%
+  \@startsection{charactertitle}%
+  {100}%        level for secnumdepth and tocdepth
+  {\z@}%       indentation
+  {\topsep}%   space before
+  {\topsep}%   space below
+  {\raggedright\Large\bfseries}% format of the text
 }
 %    \end{macrocode}
 % \end{macro}
@@ -419,10 +426,21 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\charactersection}
 %   For sections in the the character stats block, we define |\charactersection|
 %    \begin{macrocode}
-\NewDocumentCommand{\charactersection}{m}{%
-  \noindent\par\noindent\textbf{\large #1}\\\noindent%
+\newcounter{charactersection} % to keep LaTeX happy
+\newcommand{\charactersectionmark}[1]{} % ditto
+\newcommand\charactersection{%
+  \@startsection{charactersection}%
+    {101}%        level for secnumdepth and tocdepth
+    {\z@}%       indentation
+    {\topsep}%   space before
+    {-1em}%   space below
+    {\raggedright\large\bfseries}% format of the text
 }
+% \NewDocumentCommand{\charactersection}{m}{%
+%   \noindent\par\noindent\textbf{\large #1}\\\noindent%
+% }
 %    \end{macrocode}
+% who's code is taken almost without change from |https://tex.stackexchange.com/questions/97565/flexible-vspace#97570|.
 % \end{macro}
 %
 % \begin{environment}{charactertraitlist}
