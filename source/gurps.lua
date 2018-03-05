@@ -10,6 +10,7 @@ function thrust_or_swing(typ, st)
   else
     return thrust_or_swing(typ, st - 1)
   end
+  -- TODO calculate thr and sw if it's too large for the table
 end
 
 function thrust(st)
@@ -41,21 +42,24 @@ function print_dice(dice_no, modifier)
   tex.sprint("}")
 end
 
-function valued_trait(value, points)
+function valued_trait(name, value, points)
   return {
+    name=name,
     value=value,
     points=points or "?"
   }
 end
 
-function value(value)
+function value(name, value)
   return {
+    name=name,
     value=value
   }
 end
 
-function trait(points)
+function trait(name, points)
   return {
+    name=name,
     points=points or "?"
   }
 end
@@ -64,7 +68,7 @@ function base_stat(stat, multiplier, default)
   default = default or 10
   stat = stat or default
   multiplier = multiplier or 10
-  return valued_trait(stat, (stat - default)*multiplier)
+  return valued_trait("TODO_give_name", stat, (stat - default)*multiplier)
 end
 
 -- Creates an attack table.
@@ -91,8 +95,8 @@ function create_character(args)
   local c = {}
 
   c.pointless_stats = {}
-  c.pointless_stats.DR = value(args.DR or 0)
-  c.pointless_stats.SM = value(args.SM or 0)
+  c.pointless_stats.DR = value("DR", args.DR or 0)
+  c.pointless_stats.SM = value("SM", args.SM or 0)
 
   c.base_stats = {
     ST=base_stat(args.ST, 10 - c.pointless_stats.SM.value),
@@ -106,8 +110,8 @@ function create_character(args)
     return c.base_stats[key].value
   end
 
-  c.pointless_stats.thr = value(thrust(gv(c, "ST")))
-  c.pointless_stats.sw = value(swing(gv(c, "ST")))
+  c.pointless_stats.thr = value("thr", thrust(gv(c, "ST")))
+  c.pointless_stats.sw = value("sw", swing(gv(c, "ST")))
 
   -- TODO fix the double place this is defined
   c.base_stats.HP = base_stat(args.HP or gv(c, "ST"), 2, gv(c, "ST"))

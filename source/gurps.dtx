@@ -550,7 +550,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{}}{%
-  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait(#2)}%
+  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait([[\unexpanded{#1}]], #2)}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -559,7 +559,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\disadvantage}{mO{}}{%
-  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = trait(#2)}%
+  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = trait([[\unexpanded{#1}]], #2)}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -569,7 +569,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 % TODO finish this!
 \NewDocumentCommand{\levelledadvantage}{mmO{nil}}{%
-  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}%
+  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = valued_trait([[\unexpanded{#1}]], #2, #3)}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -578,7 +578,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\levelleddisadvantage}{mmO{nil}}{%
-  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = valued_trait(#2, #3)}%
+  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = valued_trait([[\unexpanded{#1}]], #2, #3)}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -587,10 +587,10 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\skill{mom}{%
   \IfNoValueTF{#2}%
-  {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {value=#3}}}%
+  {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
   {%
     \luadirect{%
-      _ARGS.skills[ [[\unexpanded{#1}]] ] = {value=#3, difficulty=[[#2]]}
+      _ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[#2]]}
     }%
   }%
 }
@@ -600,10 +600,10 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\spell{mom}{%
   \IfNoValueTF{#2}%
-  {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3}}}%
+  {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
   {%
     \luadirect{%
-      _ARGS.spells[ [[\unexpanded{#1}]] ] = {value=#3, difficulty=[[#2]]}%
+      _ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[#2]]}%
     }%
   }%
 }
