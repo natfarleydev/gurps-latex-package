@@ -130,9 +130,9 @@ function create_character(args)
       x = split(obj.difficulty)
       -- TODO fix this to be spell points vv
       points = calculate_skill_points(c, x[1], x[2], obj.value)
-      c.skills[name] = valued_trait(obj.value, points)
+      c.skills[name] = valued_trait(obj.name, obj.value, points)
     else
-      c.skills[name] = valued_trait(obj.value)
+      c.skills[name] = valued_trait(obj.name, obj.value)
     end
   end
   c.spells = {}
@@ -141,9 +141,9 @@ function create_character(args)
       x = split(obj.difficulty)
       -- TODO fix this to be spell points vv
       points = calculate_skill_points(c, x[1], x[2], obj.value)
-      c.spells[name] = valued_trait(obj.value, points)
+      c.spells[name] = valued_trait(obj.name, obj.value, points)
     else
-      c.spells[name] = valued_trait(obj.value)
+      c.spells[name] = valued_trait(obj.name, obj.value)
     end
   end
   c.attacks = {}
