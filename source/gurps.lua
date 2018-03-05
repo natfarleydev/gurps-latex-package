@@ -192,11 +192,11 @@ function print_little_section(title, tbl)
   end
 
   -- Remove non-alphanumeric characters for sorting
-  function compare(a, b)
+  function compare_only_alphanumeric(a, b)
     return a:gsub('%W', '') < b:gsub('%W', '')
   end
 
-  table.sort(x, compare)
+  table.sort(x, compare_only_alphanumeric)
 
   tex.sprint([[\begin{charactertraitlist}]])
   for i,v in ipairs(x) do
