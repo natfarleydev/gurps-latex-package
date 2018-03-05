@@ -170,7 +170,7 @@ end
 
 
 function print_little_section(title, tbl)
-  tex.sprint([[\charactersection{]] .. title .. [[}]])
+  tex.sprint([[\charactersection*{]] .. title .. [[}]])
 
   local x = {}
   for k,v in pairs(tbl) do
@@ -202,8 +202,14 @@ base_stats = {
 
 
 function print_character()
-  tex.sprint([[\charactertitle{Stats (]] .. count_points() .. [[~pt)}]])
-  tex.sprint([[\charactersection{Base stats}]])
+  -- For some reason, adding these custom commands to the table of contents
+  -- breaks LaTeX in ways I don't understand. But since we probably never ever
+  -- want to do that, we simply * the new headers and quietly forget about it
+  -- ... (:
+  --
+  -- TODO figure out why the above happens and fix it, for completeness.
+  tex.sprint([[\charactertitle*{Stats (]] .. count_points() .. [[~pt)}]])
+  tex.sprint([[\charactersection*{Base stats}]])
   local x = {}
   for i, base_stat in ipairs(base_stats) do
     local obj = character.base_stats[base_stat]

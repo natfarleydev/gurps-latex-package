@@ -1,12 +1,25 @@
 \documentclass{article}
 
 \usepackage{gurps}
+\usepackage{blindtext}
+
+
 
 \begin{document}
+
+% Generating a table of contents with unstarred \charactertitle and
+% \charactersection is currently broken for unknown reasons
+\tableofcontents
+
+\section{Dice notation demo}
+\label{sec:dice-notation-demo}
+
 \gurps is an excellent RPG system which can be typeset with \LaTeX{}! It uses 6
 sided dice which are notated as \dice{$n$}[$m$], e.g. \dice{3}, \dice{4}[0], \dice{2}[-1], \dice{7}[+11].
 
-% Look ma, random ordering of keyword arguments, and missing arguments!
+\section{A character appears}
+\label{sec:character-appears}
+
 \begin{character}
   \ST{11}
   \IQ{12}

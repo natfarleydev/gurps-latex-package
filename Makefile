@@ -4,7 +4,7 @@ all: tests/test_document.pdf
 
 tests/test_document.pdf: tests/test_document.tex $(foreach i,$(COMPILED_PACKAGE_FILES),source/$i)
 	$(foreach var,$(COMPILED_PACKAGE_FILES),cp source/$(var) tests/$(var);)
-	latexmk -g -lualatex -cd tests/test_document.tex
+	latexmk -g -lualatex --interaction=nonstopmode -cd tests/test_document.tex
 
 source/gurps.sty: source/gurps.dtx source/gurps.lua
 	$(MAKE) -C source/
