@@ -549,7 +549,7 @@ Running "make install" installs the files in the local TeX tree.
 % Adds an advantage to a character. NOTE: this only works in a |character| or
 % |lens| environment.
 %    \begin{macrocode}
-\NewDocumentCommand{\advantage}{mO{}}{%
+\NewDocumentCommand{\advantage}{mO{nil}}{%
   \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait([[\unexpanded{#1}]], #2)}%
 }
 %    \end{macrocode}
@@ -558,7 +558,7 @@ Running "make install" installs the files in the local TeX tree.
 % Adds a disadvantage to a character. NOTE: this only works in a |character| or
 % |lens| environment.
 %    \begin{macrocode}
-\NewDocumentCommand{\disadvantage}{mO{}}{%
+\NewDocumentCommand{\disadvantage}{mO{nil}}{%
   \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = trait([[\unexpanded{#1}]], #2)}%
 }
 %    \end{macrocode}
