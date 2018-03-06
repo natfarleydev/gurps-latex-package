@@ -64,11 +64,11 @@ function trait(name, points)
   }
 end
 
-function base_stat(stat, multiplier, default)
+function base_stat(name, stat, multiplier, default)
   default = default or 10
   stat = stat or default
   multiplier = multiplier or 10
-  return valued_trait("TODO_give_name", stat, (stat - default)*multiplier)
+  return valued_trait(name, stat, (stat - default)*multiplier)
 end
 
 -- Creates an attack table.
@@ -89,8 +89,28 @@ function attack(stat, damage, based_on)
   return rettable
 end
 
+-- Create HP stat. default can be nil.
+function create_hp_stat(value, default)
+  return base_stat("HP", value, 2, default)
+end
+
+-- Create Per stat. default can be nil.
+function create_per_stat(value, default)
+  return base_stat("Per", value, 5, default)
+end
+
+-- Create Will stat. default can be nil.
+function create_will_stat(value, default)
+  return base_stat("Will", value, 5, default)
+end
+
+-- Create FP stat. default can be nil.
+function create_fp_stat(value, default)
+  return base_stat("FP", value, 3, default)
+end
+
+-- Creates a character
 function create_character(args)
-  -- Creates a character
   local args = args or {}
   local c = {}
 
@@ -99,10 +119,10 @@ function create_character(args)
   c.pointless_stats.SM = value("SM", args.SM or 0)
 
   c.base_stats = {
-    ST=base_stat(args.ST, 10 - c.pointless_stats.SM.value),
-    DX=base_stat(args.DX, 20),
-    IQ=base_stat(args.IQ, 20),
-    HT=base_stat(args.HT),
+    ST=base_stat("ST", args.ST, 10 - c.pointless_stats.SM.value),
+    DX=base_stat("DX", args.DX, 20),
+    IQ=base_stat("IQ", args.IQ, 20),
+    HT=base_stat("HT", args.HT),
   }
 
   -- Gets the value for a base stat
@@ -113,37 +133,25 @@ function create_character(args)
   c.pointless_stats.thr = value("thr", thrust(gv(c, "ST")))
   c.pointless_stats.sw = value("sw", swing(gv(c, "ST")))
 
-  -- TODO fix the double place this is defined
-  c.base_stats.HP = base_stat(args.HP or gv(c, "ST"), 2, gv(c, "ST"))
-  c.base_stats.Per = base_stat(args.Per or gv(c, "IQ"), 5, gv(c, "IQ"))
-  c.base_stats.Will = base_stat(args.Will or gv(c, "IQ"), 5, gv(c, "IQ"))
-  c.base_stats.FP = base_stat(args.FP or gv(c, "HT"), 3, gv(c, "HT"))
+  c.base_stats.HP = create_hp_stat(args.HP, gv(c, "ST"))
+  c.base_stats.Per = create_per_stat(args.Per, gv(c, "IQ"))
+  c.base_stats.Will = create_will_stat(args.Will, gv(c, "IQ"))
+  c.base_stats.FP = create_fp_stat(args.FP, gv(c, "HT"))
 
-  -- c.advantages = {}
-  -- c.disadvantages = {}
   c.advantages = args.advantages
   c.disadvantages = args.disadvantages
-  -- TODO abstract the logic for spells into general skills
-  c.skills = {}
-  for name,obj in pairs(args.skills) do
-    if obj.difficulty then
-      x = split(obj.difficulty)
-      -- TODO fix this to be spell points vv
-      points = calculate_skill_points(c, x[1], x[2], obj.value)
-      c.skills[name] = valued_trait(obj.name, obj.value, points)
-    else
-      c.skills[name] = valued_trait(obj.name, obj.value)
-    end
-  end
-  c.spells = {}
-  for name,obj in pairs(args.spells) do
-    if obj.difficulty then
-      x = split(obj.difficulty)
-      -- TODO fix this to be spell points vv
-      points = calculate_skill_points(c, x[1], x[2], obj.value)
-      c.spells[name] = valued_trait(obj.name, obj.value, points)
-    else
-      c.spells[name] = valued_trait(obj.name, obj.value)
+
+  -- Create skill and spell arrays
+  for _,arraytype in ipairs({"skills", "spells"}) do
+    c[arraytype] = {}
+    for key,obj in pairs(args[arraytype]) do
+      if obj.difficulty then
+        diff_pair = split(obj.difficulty)
+        points = calculate_skill_points(c, diff_pair[1], diff_pair[2], obj.value)
+        c[arraytype][key] = valued_trait(obj.name, obj.value, points)
+      else
+        c[arraytype][key] = valued_trait(obj.name, obj.value)
+      end
     end
   end
   c.attacks = {}
@@ -151,16 +159,14 @@ function create_character(args)
   return c
 end
 
--- character = create_character()
-
-
+-- Count total points in character
 function count_points()
   running_total = 0
-  for i,traits in pairs({"base_stats",
-                         "advantages",
-                         "disadvantages",
-                         "skills",
-                         "spells"}) do
+  for _,traits in ipairs({"base_stats",
+                          "advantages",
+                          "disadvantages",
+                          "skills",
+                          "spells"}) do
     if character[traits] then
       for j,v in pairs(character[traits]) do
         if v.points ~= "?" then
@@ -172,7 +178,7 @@ function count_points()
   return running_total
 end
 
-
+-- Print a character section in LaTeX
 function print_little_section(title, tbl)
   tex.sprint([[\charactersection*{]] .. title .. [[}]])
 
@@ -203,7 +209,6 @@ function print_little_section(title, tbl)
     tex.sprint([[\item ]] .. v)
   end
   tex.sprint([[\end{charactertraitlist}]])
-  -- tex.print(table.concat(x, ", ") .. ".")
 end
 
 
@@ -275,32 +280,6 @@ function print_character_as_lens()
   end
 end
 
-
--- Creates a new LaTeX command
--- 
--- TODO move this to the dtx file because that's where documentation for LaTeX
--- files lives
-function print_set_cmd(name, extra_args)
-  extra_args = extra_args or {"nil"}
-  tex.print(
-    string.format(
-      [[\NewDocumentCommand\set%s{m}]]
-        .. [[{\luadirect{character.%s = base_stat(#1, %s)}}]],
-      name,
-      name,
-      table.concat(extra_args, ", ")
-    )
-  )
-end
-
-print_set_cmd("ST")
-print_set_cmd("DX", {"20"})
-print_set_cmd("IQ", {"20"})
-print_set_cmd("HT")
-print_set_cmd("HP", {"2", "character.base_stats.ST.value"})
-print_set_cmd("Per", {"5", "character.base_stats.IQ.value"})
-print_set_cmd("Will", {"5", "character.base_stats.IQ.value"})
-print_set_cmd("FP", {"3", "character.base_stats.HT.value"})
 
 --- Splits string (on / by default)
 function split(s, split_on)
