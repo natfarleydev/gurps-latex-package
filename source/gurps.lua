@@ -129,9 +129,34 @@ function create_character(args)
   function gv(c, key)
     return c.base_stats[key].value
   end
+  function calc_basic_speed(character)
+    return (gv(c, "DX")+gv(c, "HT"))/4
+  end
+  function calc_basic_move(character)
+    return math.floor(calc_basic_speed(character))
+  end
+  function calc_dodge(character)
+    return math.floor(calc_basic_speed(character) + 3)
+  end
 
   c.pointless_stats.thr = value("thr", thrust(gv(c, "ST")))
   c.pointless_stats.sw = value("sw", swing(gv(c, "ST")))
+  c.pointless_stats['Basic Speed'] = base_stat(
+    "Basic Speed",
+    args['Basic Speed'],
+    20,
+    calc_basic_speed(c)
+  )
+
+value(
+    "Basic Speed",
+    args['Basic Speed'] or calc_basic_speed(c)
+  )
+  c.pointless_stats['Basic Move'] = value(
+    "Basic Move",
+    args['Basic Move'] or calc_basic_move(c)
+  )
+  c.pointless_stats.Dodge = value("Dodge", args.Dodge or calc_dodge(c))
 
   c.base_stats.HP = create_hp_stat(args.HP, gv(c, "ST"))
   c.base_stats.Per = create_per_stat(args.Per, gv(c, "IQ"))
@@ -166,10 +191,11 @@ function count_points()
                           "advantages",
                           "disadvantages",
                           "skills",
-                          "spells"}) do
+                          "spells",
+                          "pointless_stats"}) do
     if character[traits] then
       for j,v in pairs(character[traits]) do
-        if v.points ~= "?" then
+        if v.points ~= "?" and v.points ~= nil then
           running_total = running_total + v.points
         end
       end

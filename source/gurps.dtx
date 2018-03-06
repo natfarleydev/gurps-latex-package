@@ -461,6 +461,13 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
+% \begin{macro}{\Basic Speed}
+% Sets the Basic Speed of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\basicspeed}{m}{\luadirect{_ARGS["Basic Speed"] = #1}}
+%    \end{macrocode}
+% \end{macro}
+
 % \begin{macro}{\charactertitle}
 %   As a title for the character stats block, we define |\charactertitle|
 %    \begin{macrocode}
