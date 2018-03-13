@@ -148,7 +148,7 @@ function create_character(args)
     calc_basic_speed(c)
   )
 
-value(
+  value(
     "Basic Speed",
     args['Basic Speed'] or calc_basic_speed(c)
   )
@@ -320,6 +320,9 @@ end
 
 function calculate_skill_points(character, based_on, difficulty, skill_level)
   -- TODO rename this variable
+  if difficulty == nil then
+    tex.print([[\PackageError{gurps}{Oh no! There's a problem with difficulty: ]] .. difficulty .. [[}{}]])
+  end
   if difficulty == "Easy" then
     difficulty_modifier = 0
   elseif difficulty == "Average" then
@@ -329,11 +332,25 @@ function calculate_skill_points(character, based_on, difficulty, skill_level)
   elseif difficulty == "Very Hard" then
     difficulty_modifier = 3
   elseif difficulty == "Wildcard" then
-    return 3*calculate_skill_points(based_on, "Very Hard", skill_level)
+    return 3*calculate_skill_points(character, based_on, "Very Hard", skill_level)
   end
 
+  local relative_level = nil
   -- TODO make support for non-base stat based_on values
-  local relative_level = skill_level - character.base_stats[based_on].value
+  for _,i in ipairs({"base_stats",
+                     "skills",
+                     "spells"}) do
+    if character[i] ~= nil then
+      if character[i][based_on] ~= nil then
+        relative_level = skill_level - character[i][based_on].value
+      end
+    end
+  end
+  if relative_level == nil then
+    tex.print([[\PackageError{gurps}{Oh no! There's a problem with basing on ]] .. based_on .. [[  }{}]])
+  end
+  -- local relative_level = skill_level - character["base_stats"][based_on].value
+
   if relative_level == (0 - difficulty_modifier) then
     return 1
   elseif relative_level == (1 - difficulty_modifier) then

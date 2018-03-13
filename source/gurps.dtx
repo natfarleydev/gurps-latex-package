@@ -597,7 +597,7 @@ Running "make install" installs the files in the local TeX tree.
   {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
   {%
     \luadirect{%
-      _ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[#2]]}
+      _ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[\unexpanded{#2}]]}
     }%
   }%
 }
@@ -610,7 +610,7 @@ Running "make install" installs the files in the local TeX tree.
   {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
   {%
     \luadirect{%
-      _ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[#2]]}%
+      _ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[\unexpanded{#2}]]}%
     }%
   }%
 }
