@@ -11,7 +11,7 @@ source/gurps.sty: source/gurps.dtx source/gurps.lua
 
 clean:
 	$(MAKE) -C source/ distclean
-	$(foreach var,$(COMPILED_PACKAGE_FILES),rm tests/$(var);)
+	$(foreach var,$(COMPILED_PACKAGE_FILES),rm -f tests/$(var);)
 	latexmk -CA -cd tests/test_document.tex
 
 inst:

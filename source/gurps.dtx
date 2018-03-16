@@ -461,10 +461,16 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
-% \begin{macro}{\Basic Speed}
+% \begin{macro}{\basicspeed}
 % Sets the Basic Speed of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\basicspeed}{m}{\luadirect{_ARGS["Basic Speed"] = #1}}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\basicmove}
+% Sets the Basic Move of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\basicmove}{m}{\luadirect{_ARGS["Basic Move"] = #1}}
 %    \end{macrocode}
 % \end{macro}
 

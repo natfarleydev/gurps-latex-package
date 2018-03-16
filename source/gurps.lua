@@ -148,13 +148,11 @@ function create_character(args)
     calc_basic_speed(c)
   )
 
-  value(
-    "Basic Speed",
-    args['Basic Speed'] or calc_basic_speed(c)
-  )
-  c.pointless_stats['Basic Move'] = value(
+  c.pointless_stats['Basic Move'] = base_stat(
     "Basic Move",
-    args['Basic Move'] or calc_basic_move(c)
+    args['Basic Move'],
+    5,
+    calc_basic_move(c)
   )
   c.pointless_stats.Dodge = value("Dodge", args.Dodge or calc_dodge(c))
 
@@ -168,14 +166,19 @@ function create_character(args)
 
   -- Create skill and spell arrays
   for _,arraytype in ipairs({"skills", "spells"}) do
+    -- Creating `arraytype` part of the character
     c[arraytype] = {}
+    -- First, create all the skills/spells
+    for key,obj in pairs(args[arraytype]) do
+      c[arraytype][key] = valued_trait(obj.name, obj.value)
+    end
+    -- Then, if there is a difficulty attached, calculate the points. They are
+    -- in this order in case skills are based on other skills.
     for key,obj in pairs(args[arraytype]) do
       if obj.difficulty then
         diff_pair = split(obj.difficulty)
         points = calculate_skill_points(c, diff_pair[1], diff_pair[2], obj.value)
         c[arraytype][key] = valued_trait(obj.name, obj.value, points)
-      else
-        c[arraytype][key] = valued_trait(obj.name, obj.value)
       end
     end
   end
@@ -195,7 +198,9 @@ function count_points()
                           "pointless_stats"}) do
     if character[traits] then
       for j,v in pairs(character[traits]) do
-        if v.points ~= "?" and v.points ~= nil then
+        -- if v.points ~= "?" and v.points ~= nil then
+        -- If v.points is a number, then...
+        if tonumber(v.points) == v.points and v.points ~= nil then
           running_total = running_total + v.points
         end
       end
