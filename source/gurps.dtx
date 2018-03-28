@@ -522,7 +522,7 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{environment}{character}
 % This environment defines a `character' i.e.~anything with full stats.
 %    \begin{macrocode}
-\NewDocumentEnvironment{character}{}{%
+\NewDocumentEnvironment{character}{O{_}}{%
 %    \end{macrocode}
   % \changes{v0.1}{2017/12/04}{Added a spurious change log entry to show what a
   % change \emph{within} an environment definition looks like.}
@@ -530,6 +530,7 @@ Running "make install" installs the files in the local TeX tree.
 % The global lua variable |_ARGS| is created and then populated by commands
 % inside the environment.
 %    \begin{macrocode}
+\luadirect{current_character_key = [[\unexpanded{#1}]]}
 \luadirect{_ARGS = {
     advantages={},
     disadvantages={},
@@ -558,12 +559,44 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{environment}
 %
+% \begin{macro}{\gurps@createandinsertattr}
+%    \begin{macrocode}
+  % OK, so this bit should support something like
+  % \gurps@createandinsertattr[mycharacter]{
+  %   name={Ally},
+  %   type=advantage,
+  %   points=15
+  % }
+  % but behind the scenes it'll turn into
+  % \luadirect{table.insert(_GCHARACTERS[ [[characterkey]] ],
+  % {
+  %   name=\gurps@createandinsertattr@name,
+  %   type=\gurps@createandinsertattr@type,
+  %   -- etc.
+  % }
+  % )}
+  % where \gurps@createandinsertattr@XXX all have sensible defaults/values
+  % i.e. \...@points is an int, \...@name is a string with [[]].
+  %
+  % This means I'll only have to mess around with the TeX/Lua boundry
+  % once (in this macro) and then have only LaTeX for the rest of
+  % this file. Hopefully. (I can define \gurps@char@get@level[...] to get
+  % levels for specific attributes)
+\NewDocumentCommand{\gurps@createandinsertattr}{O{_}mmO{nil}O{nil}}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\advantage}
 % Adds an advantage to a character. NOTE: this only works in a |character| or
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{nil}}{%
-  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait([[\unexpanded{#1}]], #2)}%
+  % \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait([[\unexpanded{#1}]], #2)}%
+  \luadirect{table.insert(_GCHARACTERS[current_character_key],
+    {
+      name=[[\unexpanded{#2}]],
+      points=#3,
+      type=[[#1]]
+    })}
 }
 %    \end{macrocode}
 % \end{macro}
