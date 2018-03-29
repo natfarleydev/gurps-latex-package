@@ -23,6 +23,7 @@ inst: all
 	cp $(NAME).sty $(UTREE)/tex/latex/$(NAME)
 	cp $(NAME).lua $(UTREE)/tex/latex/$(NAME)
 	cp gurps_tables.lua $(UTREE)/tex/latex/$(TABLE_NAME)
+	cp gurps_character.lua $(UTREE)/tex/latex/$(TABLE_NAME)
 	cp $(NAME).pdf $(UTREE)/doc/latex/$(NAME)
 install: all
 	sudo mkdir -p $(LOCAL)/{tex,source,doc}/latex/$(NAME)
@@ -30,12 +31,13 @@ install: all
 	sudo cp $(NAME).sty $(LOCAL)/tex/latex/$(NAME)
 	sudo cp $(NAME).lua $(UTREE)/tex/latex/$(NAME)
 	sudo cp gurps_tables.lua $(UTREE)/tex/latex/$(NAME)
+	sudo cp gurps_character.lua $(UTREE)/tex/latex/$(NAME)
 	sudo cp $(NAME).pdf $(LOCAL)/doc/latex/$(NAME)
 zip: all
   # Check if the latest release date has been updated
 	if grep -oP 1970/01/01 gurps.dtx; then echo -e '\033[0;31mRelease date needs updating!\033[0m'; exit 1; fi
 
 	ln -sf . $(NAME)
-	zip -Drq $(PWD)/$(NAME)-$(VERS).zip $(NAME)/{README.md,$(NAME).{pdf,dtx,lua},gurps_tables.lua}
+	zip -Drq $(PWD)/$(NAME)-$(VERS).zip $(NAME)/{README.md,$(NAME).{pdf,dtx,lua},gurps_tables.lua,gurps_character.lua}
 	rm $(NAME)
 

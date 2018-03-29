@@ -1,8 +1,6 @@
 require "gurps_tables"
 require "gurps_character"
 
-_GCHARACTERS = {}
-
 function thrust_or_swing(typ, st)
   if st < 1 then
     return "0"
@@ -196,22 +194,22 @@ end
 -- Count total points in character
 function count_points()
   running_total = 0
-  for _,traits in ipairs({"base_stats",
-                          "advantages",
-                          "disadvantages",
-                          "skills",
-                          "spells",
-                          "pointless_stats"}) do
-    if character[traits] then
-      for j,v in pairs(character[traits]) do
-        -- if v.points ~= "?" and v.points ~= nil then
-        -- If v.points is a number, then...
-        if tonumber(v.points) == v.points and v.points ~= nil then
-          running_total = running_total + v.points
-        end
-      end
-    end
-  end
+  -- for _,traits in ipairs({"base_stats",
+  --                         "advantages",
+  --                         "disadvantages",
+  --                         "skills",
+  --                         "spells",
+  --                         "pointless_stats"}) do
+  --   if character[traits] then
+  --     for j,v in pairs(character[traits]) do
+  --       -- if v.points ~= "?" and v.points ~= nil then
+  --       -- If v.points is a number, then...
+  --       if tonumber(v.points) == v.points and v.points ~= nil then
+  --         running_total = running_total + v.points
+  --       end
+  --     end
+  --   end
+  -- end
   return running_total
 end
 
@@ -269,42 +267,43 @@ function default_print_base_stats(character_key)
 end
 
 function print_character(character_key)
-  -- For some reason, adding these custom commands to the table of contents
-  -- breaks LaTeX in ways I don't understand. But since we probably never ever
-  -- want to do that, we simply * the new headers and quietly forget about it
-  -- ... (:
-  --
-  -- TODO figure out why the above happens and fix it, for completeness.
+  -- -- For some reason, adding these custom commands to the table of contents
+  -- -- breaks LaTeX in ways I don't understand. But since we probably never ever
+  -- -- want to do that, we simply * the new headers and quietly forget about it
+  -- -- ... (:
+  -- --
+  -- -- TODO figure out why the above happens and fix it, for completeness.
 
-  -- Variable setup
-  character = _GCHARACTERS[character_key]
+  -- -- Variable setup
+  -- character = _GCHARACTERS[character_key]
 
-  tex.sprint([[\charactertitle*{Stats (]] .. count_points() .. [[~pt)}]])
-  tex.sprint([[\charactersection*{Base stats}]])
-  tex.sprint("\\gurps@char@basestats[" .. character_key .. "]")
-  -- local x = {}
-  -- for i, base_stat in ipairs(base_stats) do
-  --   local obj = character.base_stats[base_stat]
-  --   table.insert(
-  --     x,
-  --     base_stat .. [[ ]] .. obj.value
-  --       .. "[" .. obj.points .. "]")
+  -- tex.sprint([[\charactertitle*{Stats (]] .. count_points() .. [[~pt)}]])
+  -- tex.sprint([[\charactersection*{Base stats}]])
+  -- tex.sprint("\\gurps@char@basestats[" .. character_key .. "]")
+  -- -- local x = {}
+  -- -- for i, base_stat in ipairs(base_stats) do
+  -- --   local obj = character.base_stats[base_stat]
+  -- --   table.insert(
+  -- --     x,
+  -- --     base_stat .. [[ ]] .. obj.value
+  -- --       .. "[" .. obj.points .. "]")
+  -- -- end
+  -- -- tex.sprint(table.concat(x, ", ") .. ".")
+  -- tex.sprint([[\begin{charactertraitlist}]])
+  -- for i,v in ipairs(x) do
+  --   tex.sprint([[\item ]] .. v)
   -- end
-  -- tex.sprint(table.concat(x, ", ") .. ".")
-  tex.sprint([[\begin{charactertraitlist}]])
-  for i,v in ipairs(x) do
-    tex.sprint([[\item ]] .. v)
-  end
-  tex.sprint([[\end{charactertraitlist}]])
+  -- tex.sprint([[\end{charactertraitlist}]])
 
-  print_little_section("Other", character.pointless_stats)
+  -- print_little_section("Other", character.pointless_stats)
 
-  print_little_section("Advantages", character.advantages)
-  print_little_section("Disadvantages", character.disadvantages)
-  print_little_section("Skills", character.skills)
-  if next(character.spells) then
-    print_little_section("Spells", character.spells)
-  end
+  -- print_little_section("Advantages", character.advantages)
+  -- print_little_section("Disadvantages", character.disadvantages)
+  -- print_little_section("Skills", character.skills)
+  -- if next(character.spells) then
+  --   print_little_section("Spells", character.spells)
+  -- end
+  tex.print([[\fbox{\emph{At the moment, the character environment is disabled!}}]])
 end
 
 function print_character_as_lens()

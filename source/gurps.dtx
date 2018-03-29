@@ -196,6 +196,7 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{character}
 %   \ST{9}
 %   \advantage{Natural afro}[1]
+%   \advantage{\TeX-nical afro}[1]
 %   \disadvantage{Big teeth}[-1]
 %   \skill{Nunchuck}[DX/Easy]{16}
 % \end{character}
@@ -287,6 +288,7 @@ Running "make install" installs the files in the local TeX tree.
 \RequirePackage{xstring}
 
 \luadirect{require("gurps.lua")}
+\luadirect{require("gurps_character.lua")}
 %    \end{macrocode}
 % \begin{macro}{\gurps}
 % Steve Jackson Games asks that the name \textbf{\textit{GURPS}} is always in
@@ -537,6 +539,7 @@ Running "make install" installs the files in the local TeX tree.
     skills={},
     spells={}
   }}
+\luadirect{new_character(\unexpanded{[[#1]]})}
 }{%
 %    \end{macrocode}
 % At the end of the environment, the character is initialised printed (via lua's
@@ -544,6 +547,10 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
   \luadirect{character = create_character(_ARGS)}
   \luadirect{print_character()}
+  \gurps@char@advantages
+  \gurps@char@disadvantages
+  \gurps@char@skills
+  \gurps@char@spells
 }
 %    \end{macrocode}
 % \end{environment}
@@ -559,30 +566,73 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{environment}
 %
-% \begin{macro}{\gurps@createandinsertattr}
+% \begin{macro}{\gurps@char@print@attr}
 %    \begin{macrocode}
-  % OK, so this bit should support something like
-  % \gurps@createandinsertattr[mycharacter]{
-  %   name={Ally},
-  %   type=advantage,
-  %   points=15
-  % }
-  % but behind the scenes it'll turn into
-  % \luadirect{table.insert(_GCHARACTERS[ [[characterkey]] ],
-  % {
-  %   name=\gurps@createandinsertattr@name,
-  %   type=\gurps@createandinsertattr@type,
-  %   -- etc.
-  % }
-  % )}
-  % where \gurps@createandinsertattr@XXX all have sensible defaults/values
-  % i.e. \...@points is an int, \...@name is a string with [[]].
-  %
-  % This means I'll only have to mess around with the TeX/Lua boundry
-  % once (in this macro) and then have only LaTeX for the rest of
-  % this file. Hopefully. (I can define \gurps@char@get@level[...] to get
-  % levels for specific attributes)
-\NewDocumentCommand{\gurps@createandinsertattr}{O{_}mmO{nil}O{nil}}
+\NewDocumentCommand{\gurps@char@print@attr}{mmm}{#1~#2[#3]}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\gurps@char@pushattr}
+%    \begin{macrocode}
+\define@key{gurps@char@insertattr}{name}{%
+  \def\gurps@char@insertattr@name{\unexpanded{[[#1]]}}}
+\define@key{gurps@char@insertattr}{type}{%
+  \def\gurps@char@insertattr@type{\unexpanded{[[#1]]}}}
+\define@key{gurps@char@insertattr}{level}{%
+  \def\gurps@char@insertattr@level{#1}}
+\define@key{gurps@char@insertattr}{points}{%
+  \def\gurps@char@insertattr@points{#1}}
+\define@key{gurps@char@insertattr}{basedon}{%
+  \def\gurps@char@insertattr@basedon{\unexpanded{[[#1]]}}}
+\define@key{gurps@char@insertattr}{difficulty}{%
+  \def\gurps@char@insertattr@difficulty{\unexpanded{[[#1]]}}}
+\NewDocumentCommand{\gurps@char@insertattr}{O{_}m}{
+  \def\@myenvname{character}
+  \ifx\@currenvir\@myenvname
+  % pass
+  \else
+  \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
+  \fi
+
+  \setkeys{gurps@char@insertattr}{
+    name=NotSet,
+    type=NotSet,
+    points=nil,
+    level=nil,
+    basedon=DX,
+    difficulty=NotSet
+  }
+
+  \setkeys{gurps@char@insertattr}{#2}
+
+  \luadirect{x = {
+      name=\gurps@char@insertattr@name,
+      type=\gurps@char@insertattr@type,
+      points=\gurps@char@insertattr@points,
+      level=\gurps@char@insertattr@level,
+      basedon=\gurps@char@insertattr@basedon,
+      difficulty=\gurps@char@insertattr@difficulty
+    }
+  }
+  \luadirect{
+    if_else_packageerror(
+      function() return is_valid_type(x.type) end,
+      "Type '" .. x.type .. "' is not a valid attribute type!"
+        .. " Did you remember to set the type?"
+    )
+    if_else_packageerror(
+      function() return is_valid_points(x.points) end,
+      "Points value '" .. tostring(x.points) .. "' is not valid!"
+    )
+    if x.type == "skill" or x.type == "spell" then 
+      if_else_packageerror(
+        function() return is_valid_difficulty(x.difficulty) end,
+        "Difficulty value '" .. x.difficulty .. "' is not valid!"
+      )
+    end
+    insert_attr(\luastring{#1}, x)
+  }
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\advantage}
@@ -590,14 +640,46 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{nil}}{%
-  % \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = trait([[\unexpanded{#1}]], #2)}%
-  \luadirect{table.insert(_GCHARACTERS[current_character_key],
-    {
-      name=[[\unexpanded{#2}]],
-      points=#3,
-      type=[[#1]]
-    })}
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=advantage,%
+    points=#2%
+  }%
 }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@TraitListMaker}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@TraitListMaker}{mm}{
+  \NewDocumentCommand{#1}{O{_}}{
+    \makeatletter
+    \luadirect{
+      array = filter(#2, get_character(\luastring{##1}))
+      print(array)
+      print(array)
+      if array then
+      for _,v in ipairs(array) do
+      tex.sprint([[\gurps@char@print@attr{]] .. v.name .. "}{" .. tostring(v.level) .. "}{" .. tostring(v.points) .. "}")
+      end
+      else
+      tex.sprint("...")
+      end
+    }%
+    \makeatother
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@advantages}
+%    \begin{macrocode}
+\gurps@char@TraitListMaker{\gurps@char@advantages}{is_advantage}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@disadvantages}
+%    \begin{macrocode}
+\gurps@char@TraitListMaker{\gurps@char@disadvantages}{is_disadvantage}
+\gurps@char@TraitListMaker{\gurps@char@skills}{is_skill}
+\gurps@char@TraitListMaker{\gurps@char@spells}{is_spell}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\disadvantage}
@@ -605,7 +687,11 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\disadvantage}{mO{nil}}{%
-  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = trait([[\unexpanded{#1}]], #2)}%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=disadvantage,%
+    points=#2%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -615,7 +701,12 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 % TODO finish this!
 \NewDocumentCommand{\levelledadvantage}{mmO{nil}}{%
-  \luadirect{_ARGS.advantages[ [[\unexpanded{#1}]] ] = valued_trait([[\unexpanded{#1}]], #2, #3)}%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=advantage,%
+    level=#2,
+    points=#3%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -624,7 +715,12 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\levelleddisadvantage}{mmO{nil}}{%
-  \luadirect{_ARGS.disadvantages[ [[\unexpanded{#1}]] ] = valued_trait([[\unexpanded{#1}]], #2, #3)}%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=disadvantage,%
+    level=#2,
+    points=#3%
+  }%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -632,26 +728,37 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\skill}
 %    \begin{macrocode}
 \NewDocumentCommand\skill{mom}{%
-  \IfNoValueTF{#2}%
-  {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
-  {%
-    \luadirect{%
-      _ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[\unexpanded{#2}]]}
-    }%
+  % TODO sort out points for skills again
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=skill,%
+    level=#3
   }%
+  % \IfNoValueTF{#2}%
+  % {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
+  % {%
+  %   \luadirect{%
+  %     _ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[\unexpanded{#2}]]}
+  %   }%
+  % }%
 }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\spell}
 %    \begin{macrocode}
 \NewDocumentCommand\spell{mom}{%
-  \IfNoValueTF{#2}%
-  {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
-  {%
-    \luadirect{%
-      _ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[\unexpanded{#2}]]}%
-    }%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=spell,%
+    level=#3
   }%
+  % \IfNoValueTF{#2}%
+  % {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
+  % {%
+  %   \luadirect{%
+  %     _ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[\unexpanded{#2}]]}%
+  %   }%
+  % }%
 }
 %    \end{macrocode}
 % \end{macro}

@@ -1,4 +1,4 @@
-COMPILED_PACKAGE_FILES = $(foreach var,.sty .lua _tables.lua,gurps$(var))
+COMPILED_PACKAGE_FILES = $(foreach var,.sty .lua _tables.lua _character.lua,gurps$(var))
 
 all: tests/test_document.pdf
 
@@ -6,7 +6,7 @@ tests/test_document.pdf: tests/test_document.tex $(foreach i,$(COMPILED_PACKAGE_
 	$(foreach var,$(COMPILED_PACKAGE_FILES),cp source/$(var) tests/$(var);)
 	latexmk -g -lualatex --interaction=nonstopmode -cd tests/test_document.tex
 
-source/gurps.sty: source/gurps.dtx source/gurps.lua
+source/gurps.sty: source/gurps.dtx source/gurps.lua source/gurps_character.lua source/gurps_tables.lua
 	$(MAKE) -C source/
 
 clean:
