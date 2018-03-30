@@ -185,6 +185,7 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{verbatim}
 % \begin{character}
 %   \ST{9}
+%   \HP{12}
 %   \advantage{Natural afro}[1]
 %   \disadvantage{Big teeth}[-1]
 %   \skill{Nunchuck}[DX/Easy]{16}
@@ -194,6 +195,7 @@ Running "make install" installs the files in the local TeX tree.
 % creates \ldots{}
 %
 % \begin{character}
+%   \HP{12}
 %   \ST{9}
 %   \advantage{Natural afro}[1]
 %   \advantage{\TeX-nical afro}[1]
@@ -392,39 +394,182 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
+%
+%\subsection{Character environment}
+%\label{sec:character-environment}
+%
+% \begin{macro}{\SetCharacterKey}
+% Sets the key for the current character. This acts like a variable name but
+% only for characters.
+%    \begin{macrocode}
+\NewDocumentCommand{\SetCharacterKey}{m}{%
+  \luadirect{_GCHARACTERKEY = \luastring{\unexpanded{#1}}}%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\ResetCharacterKey}
+% Resets the character key to |_|.
+%    \begin{macrocode}
+\NewDocumentCommand{\ResetCharacterKey}{}{%
+  \SetCharacterKey{_}%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+% \begin{environment}{character}
+% This environment defines a `character' i.e.~anything with full stats.
+%    \begin{macrocode}
+\NewDocumentEnvironment{character}{O{_}}{%
+%    \end{macrocode}
+  % \changes{v0.1}{2017/12/04}{Added a spurious change log entry to show what a
+  % change \emph{within} an environment definition looks like.}
+%
+% The global lua variable |_ARGS| is created and then populated by commands
+% inside the environment.
+%    \begin{macrocode}
+  \SetCharacterKey{#1}
+  \luadirect{new_character(_GCHARACTERKEY)}
+  \luadirect{_ARGS = {} }
+}{%
+  % \luadirect{character = create_character(_ARGS)}
+  \gurps@char@basicattributes
+  \gurps@char@secondarycharacteristics
+  \gurps@char@advantages
+  \gurps@char@disadvantages
+  \gurps@char@skills
+  \gurps@char@spells
+  \ResetCharacterKey
+}
+%    \end{macrocode}
+% \end{environment}
+% 
+% \begin{macro}{\gurps@char@insertattr}
+% Macro for inserting an attribute to the character.
+%    \begin{macrocode}
+\define@key{gurps@char@insertattr}{name}{%
+  \def\gurps@char@insertattr@name{\unexpanded{[[#1]]}}}
+\define@key{gurps@char@insertattr}{type}{%
+  \def\gurps@char@insertattr@type{\unexpanded{[[#1]]}}}
+\define@key{gurps@char@insertattr}{level}{%
+  \def\gurps@char@insertattr@level{#1}}
+\define@key{gurps@char@insertattr}{points}{%
+  \def\gurps@char@insertattr@points{#1}}
+\define@key{gurps@char@insertattr}{basedon}{%
+  \def\gurps@char@insertattr@basedon{\unexpanded{[[#1]]}}}
+\define@key{gurps@char@insertattr}{difficulty}{%
+  \def\gurps@char@insertattr@difficulty{\unexpanded{[[#1]]}}}
+\NewDocumentCommand{\gurps@char@insertattr}{O{_}m}{
+  \def\@myenvname{character}
+  \ifx\@currenvir\@myenvname
+  % pass
+  \else
+  \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
+  \fi
 
+  \setkeys{gurps@char@insertattr}{
+    name=NotSet,
+    type=NotSet,
+    points=nil,
+    level=nil,
+    basedon=DX,
+    difficulty=NotSet
+  }
+
+  \setkeys{gurps@char@insertattr}{#2}
+
+  \luadirect{x = {
+      name=\gurps@char@insertattr@name,
+      type=\gurps@char@insertattr@type,
+      points=\gurps@char@insertattr@points,
+      level=\gurps@char@insertattr@level,
+      basedon=\gurps@char@insertattr@basedon,
+      difficulty=\gurps@char@insertattr@difficulty
+    }
+  }
+  \luadirect{
+    if_else_packageerror(
+      function() return is_valid_type(x.type) end,
+      "Type '" .. x.type .. "' is not a valid attribute type!"
+        .. " Did you remember to set the type?"
+    )
+    if_else_packageerror(
+      function() return is_valid_points(x.points) end,
+      "Points value '" .. tostring(x.points) .. "' is not valid!"
+    )
+    if x.type == "skill" or x.type == "spell" then 
+      if_else_packageerror(
+        function() return is_valid_difficulty(x.difficulty) end,
+        "Difficulty value '" .. x.difficulty .. "' is not valid!"
+      )
+    end
+    insert_attr(\luastring{#1}, x)
+  }
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%\subsubsection{Basic attributes}
+%\label{sec:basic-attributes}
+%
+% \begin{macro}{\gurps@char@insert@basicattr}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@insert@basicattr}{mmO{10}O{10}}{
+  \gurps@char@insertattr{
+    name=#1,
+    type=basic_attribute,
+    level=#2,
+    points=(#2 - #3)*#4
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\ST}
 % Sets the strength of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\ST}{m}{\luadirect{_ARGS.ST = #1}}
+\NewDocumentCommand{\ST}{m}{\gurps@char@insert@basicattr{ST}{#1}}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\DX}
 % Sets the dexterity of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\DX}{m}{\luadirect{_ARGS.DX = #1}}
+\NewDocumentCommand{\DX}{m}{\gurps@char@insert@basicattr{DX}{#1}[10][20]}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\IQ}
 % Sets the IQ of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\IQ}{m}{\luadirect{_ARGS.IQ = #1}}
+\NewDocumentCommand{\IQ}{m}{\gurps@char@insert@basicattr{IQ}{#1}[10][20]}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\HT}
 % Sets the health of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\HT}{m}{\luadirect{_ARGS.HT = #1}}
+\NewDocumentCommand{\HT}{m}{\gurps@char@insert@basicattr{HT}{#1}}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\HP}
 % Sets the HP of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\HP}{m}{\luadirect{_ARGS.HP = #1}}
+  % \NewDocumentCommand{\HP}{m}{\luadirect{_ARGS.HP = #1}}
+  % return base_stat("HP", value, 2, default)
+\NewDocumentCommand{\HP}{m}{%
+  % \edef\tmp@default{\luadirect{%
+  %     % TODO don't work out the points here if ST isn't defined yet. Leave it as
+  %     % nil and then have a function that works it all out later based on the
+  %     % value of ST (after default ST has been defined)
+  %     st_attr_arr = filter({name="ST"}, get_character(_GCHARACTERKEY))
+  %     if not st_attr_arr then
+  %       tex.error("Tried to define HP but ST is not yet defined!")
+  %     end
+  %     tex.sprint(st_attr_arr[1].level)
+  %   }%
+  % }
+  % \gurps@char@insert@basicattr{HP}{#1}[\tmp@default][2]
+}
 %    \end{macrocode}
 % \end{macro}
 
@@ -521,39 +666,6 @@ Running "make install" installs the files in the local TeX tree.
   {\end{itemize*}}
 %    \end{macrocode}
 % \end{environment}
-% \begin{environment}{character}
-% This environment defines a `character' i.e.~anything with full stats.
-%    \begin{macrocode}
-\NewDocumentEnvironment{character}{O{_}}{%
-%    \end{macrocode}
-  % \changes{v0.1}{2017/12/04}{Added a spurious change log entry to show what a
-  % change \emph{within} an environment definition looks like.}
-%
-% The global lua variable |_ARGS| is created and then populated by commands
-% inside the environment.
-%    \begin{macrocode}
-\luadirect{current_character_key = [[\unexpanded{#1}]]}
-\luadirect{_ARGS = {
-    advantages={},
-    disadvantages={},
-    skills={},
-    spells={}
-  }}
-\luadirect{new_character(\unexpanded{[[#1]]})}
-}{%
-%    \end{macrocode}
-% At the end of the environment, the character is initialised printed (via lua's
-% |tex.print|).
-%    \begin{macrocode}
-  \luadirect{character = create_character(_ARGS)}
-  \luadirect{print_character()}
-  \gurps@char@advantages
-  \gurps@char@disadvantages
-  \gurps@char@skills
-  \gurps@char@spells
-}
-%    \end{macrocode}
-% \end{environment}
 %
 % \begin{environment}{lens}
 % Like |character|, but it's a lens.
@@ -572,69 +684,6 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
-% \begin{macro}{\gurps@char@pushattr}
-%    \begin{macrocode}
-\define@key{gurps@char@insertattr}{name}{%
-  \def\gurps@char@insertattr@name{\unexpanded{[[#1]]}}}
-\define@key{gurps@char@insertattr}{type}{%
-  \def\gurps@char@insertattr@type{\unexpanded{[[#1]]}}}
-\define@key{gurps@char@insertattr}{level}{%
-  \def\gurps@char@insertattr@level{#1}}
-\define@key{gurps@char@insertattr}{points}{%
-  \def\gurps@char@insertattr@points{#1}}
-\define@key{gurps@char@insertattr}{basedon}{%
-  \def\gurps@char@insertattr@basedon{\unexpanded{[[#1]]}}}
-\define@key{gurps@char@insertattr}{difficulty}{%
-  \def\gurps@char@insertattr@difficulty{\unexpanded{[[#1]]}}}
-\NewDocumentCommand{\gurps@char@insertattr}{O{_}m}{
-  \def\@myenvname{character}
-  \ifx\@currenvir\@myenvname
-  % pass
-  \else
-  \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
-  \fi
-
-  \setkeys{gurps@char@insertattr}{
-    name=NotSet,
-    type=NotSet,
-    points=nil,
-    level=nil,
-    basedon=DX,
-    difficulty=NotSet
-  }
-
-  \setkeys{gurps@char@insertattr}{#2}
-
-  \luadirect{x = {
-      name=\gurps@char@insertattr@name,
-      type=\gurps@char@insertattr@type,
-      points=\gurps@char@insertattr@points,
-      level=\gurps@char@insertattr@level,
-      basedon=\gurps@char@insertattr@basedon,
-      difficulty=\gurps@char@insertattr@difficulty
-    }
-  }
-  \luadirect{
-    if_else_packageerror(
-      function() return is_valid_type(x.type) end,
-      "Type '" .. x.type .. "' is not a valid attribute type!"
-        .. " Did you remember to set the type?"
-    )
-    if_else_packageerror(
-      function() return is_valid_points(x.points) end,
-      "Points value '" .. tostring(x.points) .. "' is not valid!"
-    )
-    if x.type == "skill" or x.type == "spell" then 
-      if_else_packageerror(
-        function() return is_valid_difficulty(x.difficulty) end,
-        "Difficulty value '" .. x.difficulty .. "' is not valid!"
-      )
-    end
-    insert_attr(\luastring{#1}, x)
-  }
-}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\advantage}
 % Adds an advantage to a character. NOTE: this only works in a |character| or
 % |lens| environment.
@@ -680,6 +729,8 @@ Running "make install" installs the files in the local TeX tree.
 \gurps@char@TraitListMaker{\gurps@char@disadvantages}{is_disadvantage}
 \gurps@char@TraitListMaker{\gurps@char@skills}{is_skill}
 \gurps@char@TraitListMaker{\gurps@char@spells}{is_spell}
+\gurps@char@TraitListMaker{\gurps@char@basicattributes}{is_basic_attribute}
+\gurps@char@TraitListMaker{\gurps@char@secondarycharacteristics}{is_secondary_characteristic}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\disadvantage}

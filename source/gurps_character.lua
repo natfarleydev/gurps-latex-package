@@ -41,7 +41,7 @@ end
 
 -- insert attribute into a character specified by a key
 function insert_attr(character_key, attr)
-  table.insert(_GCHARACTERS[character_key], attr)
+  table.insert(get_character(character_key), attr)
 end
 
 -- Turns an array into a table with identical key/value pairs
