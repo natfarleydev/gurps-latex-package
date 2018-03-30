@@ -126,7 +126,8 @@ Running "make install" installs the files in the local TeX tree.
 %   can with this package!
 % \end{abstract}
 %
-%
+% \tableofcontents
+% 
 % \section{Motivation}
 %
 % I often like to make \gurps game aids for my own games. Over time, I started
@@ -432,11 +433,17 @@ Running "make install" installs the files in the local TeX tree.
   \luadirect{_ARGS = {} }
 }{%
   % \luadirect{character = create_character(_ARGS)}
+  \charactersection*{Basic Attributes}
   \gurps@char@basicattributes
+  \charactersection*{Secondary Characteristics}
   \gurps@char@secondarycharacteristics
+  \charactersection*{Advantages}
   \gurps@char@advantages
+  \charactersection*{Disadvantages}
   \gurps@char@disadvantages
+  \charactersection*{Skills}
   \gurps@char@skills
+  \charactersection*{Spells}
   \gurps@char@spells
   \ResetCharacterKey
 }
@@ -511,64 +518,80 @@ Running "make install" installs the files in the local TeX tree.
 %\subsubsection{Basic attributes}
 %\label{sec:basic-attributes}
 %
-% \begin{macro}{\gurps@char@insert@basicattr}
-%    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@insert@basicattr}{mmO{10}O{10}}{
-  \gurps@char@insertattr{
-    name=#1,
-    type=basic_attribute,
-    level=#2,
-    points=(#2 - #3)*#4
-  }%
-}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\ST}
 % Sets the strength of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\ST}{m}{\gurps@char@insert@basicattr{ST}{#1}}
+\NewDocumentCommand{\ST}{mO{nil}}{
+  \gurps@char@insertattr{
+    name=ST,
+    type=basic_attribute,
+    level=#1,
+    points=#2
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\DX}
 % Sets the dexterity of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\DX}{m}{\gurps@char@insert@basicattr{DX}{#1}[10][20]}
+\NewDocumentCommand{\DX}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=DX,
+    type=basic_attribute,
+    level=#1,
+    points=#2
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\IQ}
 % Sets the IQ of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\IQ}{m}{\gurps@char@insert@basicattr{IQ}{#1}[10][20]}
+\NewDocumentCommand{\IQ}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=IQ,
+    type=basic_attribute,
+    level=#1,
+    points=#2
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\HT}
 % Sets the health of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\HT}{m}{\gurps@char@insert@basicattr{HT}{#1}}
+\NewDocumentCommand{\HT}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=HT,
+    type=basic_attribute,
+    level=#1,
+    points=#2
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
+%
+%
+%\subsubsection{Secondary Characteristics}
+%\label{sec:secondary-characteristics}
+%
+% This section defines secondary characteristics (as \gurpsbook{Basic Set}).
+% Points are set in a later function \cs{gurps@char@checkandfixpoints} (TODO
+% make this command!)
 
 % \begin{macro}{\HP}
 % Sets the HP of the current character
 %    \begin{macrocode}
-  % \NewDocumentCommand{\HP}{m}{\luadirect{_ARGS.HP = #1}}
-  % return base_stat("HP", value, 2, default)
-\NewDocumentCommand{\HP}{m}{%
-  % \edef\tmp@default{\luadirect{%
-  %     % TODO don't work out the points here if ST isn't defined yet. Leave it as
-  %     % nil and then have a function that works it all out later based on the
-  %     % value of ST (after default ST has been defined)
-  %     st_attr_arr = filter({name="ST"}, get_character(_GCHARACTERKEY))
-  %     if not st_attr_arr then
-  %       tex.error("Tried to define HP but ST is not yet defined!")
-  %     end
-  %     tex.sprint(st_attr_arr[1].level)
-  %   }%
-  % }
-  % \gurps@char@insert@basicattr{HP}{#1}[\tmp@default][2]
+\NewDocumentCommand{\HP}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=HP,
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -576,111 +599,95 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\Per}
 % Sets the perception of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\Per}{m}{\luadirect{_ARGS.Per = #1}}
+\NewDocumentCommand{\Per}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=Per,
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\Will}
 % Sets the will of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\Will}{m}{\luadirect{_ARGS.Will = #1}}
+\NewDocumentCommand{\Will}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=Will,
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\FP}
 % Sets the FP of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\FP}{m}{\luadirect{_ARGS.FP = #1}}
+\NewDocumentCommand{\FP}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=FP,
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\SM}
 % Sets the SM of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\SM}{m}{\luadirect{_ARGS.SM = #1}}
+\NewDocumentCommand{\SM}{m}{%
+  \gurps@char@insertattr{
+    name=SM,
+    type=property,
+    level=#1
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\DR}
 % Sets the DR of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\DR}{m}{\luadirect{_ARGS.DR = #1}}
+\NewDocumentCommand{\DR}{m}{
+  \gurps@char@insertattr{
+    name=DR,
+    type=property,
+    level=#1
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 
 % \begin{macro}{\basicspeed}
 % Sets the Basic Speed of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\basicspeed}{m}{\luadirect{_ARGS["Basic Speed"] = #1}}
+\NewDocumentCommand{\basicspeed}{mO{nil}}{
+  \gurps@char@insertattr{
+    name={Basic Speed},
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\basicmove}
 % Sets the Basic Move of the current character
 %    \begin{macrocode}
-\NewDocumentCommand{\basicmove}{m}{\luadirect{_ARGS["Basic Move"] = #1}}
-%    \end{macrocode}
-% \end{macro}
-
-% \begin{macro}{\charactertitle}
-%   As a title for the character stats block, we define |\charactertitle|
-%    \begin{macrocode}
-\newcounter{charactertitle} % to keep LaTeX happy
-\newcommand{\charactertitlemark}[1]{} % ditto
-\newcommand\charactertitle{%
-  \@startsection{charactertitle}%
-  {100}%        level for secnumdepth and tocdepth
-  {\z@}%       indentation
-  {\topsep}%   space before
-  {\topsep}%   space below
-  {\raggedright\Large\bfseries}% format of the text
+\NewDocumentCommand{\basicmove}{mO{nil}}{
+  \gurps@char@insertattr{
+    name={Basic Move},
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
 }
-%    \end{macrocode}
-% \end{macro}
-% 
-% \begin{macro}{\charactersection}
-%   For sections in the the character stats block, we define |\charactersection|
-%    \begin{macrocode}
-\newcounter{charactersection} % to keep LaTeX happy
-\newcommand{\charactersectionmark}[1]{} % ditto
-\newcommand\charactersection{%
-  \@startsection{charactersection}%
-    {101}%        level for secnumdepth and tocdepth
-    {\z@}%       indentation
-    {\topsep}%   space before
-    {-1em}%   space below
-    {\raggedright\large\bfseries}% format of the text
-}
-% \NewDocumentCommand{\charactersection}{m}{%
-%   \noindent\par\noindent\textbf{\large #1}\\\noindent%
-% }
-%    \end{macrocode}
-% who's code is taken almost without change from |https://tex.stackexchange.com/questions/97565/flexible-vspace#97570|.
-% \end{macro}
-%
-% \begin{environment}{charactertraitlist}
-%  We define the |charactertraitlist| to list the traits. By default, this is an
-%  |itemize*| from the |enumitem| package with some customisations
-%    \begin{macrocode}
-\NewDocumentEnvironment{charactertraitlist}{}
-{\noindent\begin{itemize*}[itemjoin={{; }},label=,afterlabel={},midpenalty=0]}
-  {\end{itemize*}}
-%    \end{macrocode}
-% \end{environment}
-%
-% \begin{environment}{lens}
-% Like |character|, but it's a lens.
-%    \begin{macrocode}
-\newenvironment{lens}[1]{%
-  \luadirect{character = create_character({#1})}%
-}{%
-  \luadirect{print_character_as_lens()}
-}
-%    \end{macrocode}
-% \end{environment}
-%
-% \begin{macro}{\gurps@char@print@attr}
-%    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@print@attr}{mmm}{#1~#2[#3]}
 %    \end{macrocode}
 % \end{macro}
 
@@ -695,42 +702,6 @@ Running "make install" installs the files in the local TeX tree.
     points=#2%
   }%
 }
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\gurps@char@TraitListMaker}
-%    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@TraitListMaker}{mm}{
-  \NewDocumentCommand{#1}{O{_}}{
-    \makeatletter
-    \luadirect{
-      array = filter(#2, get_character(\luastring{##1}))
-      print(array)
-      print(array)
-      if array then
-      for _,v in ipairs(array) do
-      tex.sprint([[\gurps@char@print@attr{]] .. v.name .. "}{" .. tostring(v.level) .. "}{" .. tostring(v.points) .. "}")
-      end
-      else
-      tex.sprint("...")
-      end
-    }%
-    \makeatother
-  }%
-}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\gurps@char@advantages}
-%    \begin{macrocode}
-\gurps@char@TraitListMaker{\gurps@char@advantages}{is_advantage}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\gurps@char@disadvantages}
-%    \begin{macrocode}
-\gurps@char@TraitListMaker{\gurps@char@disadvantages}{is_disadvantage}
-\gurps@char@TraitListMaker{\gurps@char@skills}{is_skill}
-\gurps@char@TraitListMaker{\gurps@char@spells}{is_spell}
-\gurps@char@TraitListMaker{\gurps@char@basicattributes}{is_basic_attribute}
-\gurps@char@TraitListMaker{\gurps@char@secondarycharacteristics}{is_secondary_characteristic}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\disadvantage}
@@ -811,6 +782,111 @@ Running "make install" installs the files in the local TeX tree.
   %   }%
   % }%
 }
+%    \end{macrocode}
+% \end{macro}
+
+%
+%\subsubsection{Stat block formatting}
+%\label{sec:stat-block-formatting}
+%
+% \begin{macro}{\charactertitle}
+%   As a title for the character stats block, we define |\charactertitle|
+%    \begin{macrocode}
+\newcounter{charactertitle} % to keep LaTeX happy
+\newcommand{\charactertitlemark}[1]{} % ditto
+\newcommand\charactertitle{%
+  \@startsection{charactertitle}%
+  {100}%        level for secnumdepth and tocdepth
+  {\z@}%       indentation
+  {\topsep}%   space before
+  {\topsep}%   space below
+  {\raggedright\Large\bfseries}% format of the text
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\charactersection}
+%   For sections in the the character stats block, we define |\charactersection|
+%    \begin{macrocode}
+\newcounter{charactersection} % to keep LaTeX happy
+\newcommand{\charactersectionmark}[1]{} % ditto
+\newcommand\charactersection{%
+  \@startsection{charactersection}%
+    {101}%        level for secnumdepth and tocdepth
+    {\z@}%       indentation
+    {\topsep}%   space before
+    {-1em}%   space below
+    {\raggedright\normalsize\bfseries}% format of the text
+}
+% \NewDocumentCommand{\charactersection}{m}{%
+%   \noindent\par\noindent\textbf{\large #1}\\\noindent%
+% }
+%    \end{macrocode}
+% who's code is taken almost without change from |https://tex.stackexchange.com/questions/97565/flexible-vspace#97570|.
+% \end{macro}
+%
+% \begin{environment}{charactertraitlist}
+%  We define the |charactertraitlist| to list the traits. By default, this is an
+%  |itemize*| from the |enumitem| package with some customisations
+%    \begin{macrocode}
+\NewDocumentEnvironment{charactertraitlist}{}
+{\noindent\begin{itemize*}[itemjoin={{; }},label=,afterlabel={},midpenalty=0]}
+  {\end{itemize*}}
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{environment}{lens}
+% Like |character|, but it's a lens.
+%    \begin{macrocode}
+\newenvironment{lens}[1]{%
+  \luadirect{character = create_character({#1})}%
+}{%
+  \luadirect{print_character_as_lens()}
+}
+%    \end{macrocode}
+% \end{environment}
+%
+% \begin{macro}{\gurps@char@print@attr}
+% It's like this: \cs{gurps@char@print@attr}\oarg{level}\marg{name}\oarg{points}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@print@attr}{omo}{%
+  \IfValueTF{#3}{%
+    \DeclareDocumentCommand{\tmp@points}{}{[#3]}%
+  }{%
+    \DeclareDocumentCommand{\tmp@points}{}{[?]}%
+  }%
+  \IfValueTF{#1}{%
+    #2~#1\tmp@points%
+  }{%
+    #2\tmp@points%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\gurps@char@TraitListMaker}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@TraitListMaker}{mm}{
+  \NewDocumentCommand{#1}{O{_}}{%
+    \makeatletter%
+    \luadirect{traitlistmaker(#2, \luastring{##1})}%
+    \makeatother%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@advantages}
+%    \begin{macrocode}
+\gurps@char@TraitListMaker{\gurps@char@advantages}{is_advantage}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@disadvantages}
+%    \begin{macrocode}
+\gurps@char@TraitListMaker{\gurps@char@disadvantages}{is_disadvantage}
+\gurps@char@TraitListMaker{\gurps@char@skills}{is_skill}
+\gurps@char@TraitListMaker{\gurps@char@spells}{is_spell}
+\gurps@char@TraitListMaker{\gurps@char@basicattributes}{is_basic_attribute}
+\gurps@char@TraitListMaker{\gurps@char@secondarycharacteristics}{is_secondary_characteristic}
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}

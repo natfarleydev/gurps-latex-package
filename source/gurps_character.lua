@@ -62,7 +62,8 @@ enums.type = _identity_pairs_tbl({"advantage" ,
                                  "spell" ,
                                  "basic_attribute" ,
                                  "secondary_characteristic" ,
-                                 "attack"})
+                                 "attack",
+                                 "property"})
 enums.difficulty = {
   easy="Easy",
   average="Average",
@@ -95,6 +96,7 @@ function filter(predicate, array)
     tex.error("Array passed to filter is nil...")
   end
 
+  at_least_one_match = false
   for _,v in ipairs(array) do
     if predicate(v) then
       table.insert(ret_array, v)
@@ -181,4 +183,28 @@ function if_else_packageerror(pred, message)
   else
     tex.sprint([[\PackageError{gurps}{]] .. message .. [[}{}]])
   end
+end
+
+function traitlistmaker(predicate, character_key)
+  s = [[\begin{charactertraitlist}]]
+
+  array = filter(predicate, get_character(character_key))
+  if array then
+    for _,v in ipairs(array) do
+      level_str = ""
+      if v.level then
+        level_str = "[" .. v.level .. "]"
+      end
+      s = s .. [[ \item \gurps@char@print@attr]] .. level_str .. "{" ..
+          tostring(v.name) .. "}[" .. tostring(v.points) .. "]"
+    end
+  else
+    s = s .. [[\item ...]]
+  end
+  s = s .. [[ \end{charactertraitlist}]]
+  print(array)
+  print(array)
+  print(s)
+  print(s)
+  tex.print(s)
 end
