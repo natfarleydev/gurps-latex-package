@@ -1,26 +1,4 @@
-require "gurps_tables"
 require "gurps_character"
-
-function thrust_or_swing(typ, st)
-  if st < 1 then
-    return "0"
-  end
-
-  if _GTHRUSTSWINGTABLE[typ][st] then
-    return _GTHRUSTSWINGTABLE[typ][st]
-  else
-    return thrust_or_swing(typ, st - 1)
-  end
-  -- TODO calculate thr and sw if it's too large for the table
-end
-
-function thrust(st)
-  return thrust_or_swing("thrust", st)
-end
-
-function swing(st)
-  return thrust_or_swing("swing", st)
-end
 
 function print_dice(dice_no, modifier)
   tex.sprint([[\mbox{]])

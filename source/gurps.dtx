@@ -118,7 +118,8 @@ Running "make install" installs the files in the local TeX tree.
 %\changes{v0.1}{2018/02/13}{First public release}
 %\changes{v0.1.1}{2018/02/14}{Minor changes to CTAN upload}
 %\changes{v0.2}{2018/03/04}{Better character environment; \cs{gurpsbook} command added.}
-%\changes{v0.3}{1970/01/01}{TODO}
+%\changes{v0.3}{1970/01/01}{Completely changed underlying character lua
+%structure. Removed lens environment (to be put in at a later date). TODO}
 %
 % \begin{abstract}
 %   \textit{\textbf{GURPS}} is an excellent RPG system. \LaTeX{} is an excellent
@@ -421,22 +422,17 @@ Running "make install" installs the files in the local TeX tree.
 % This environment defines a `character' i.e.~anything with full stats.
 %    \begin{macrocode}
 \NewDocumentEnvironment{character}{O{_}}{%
-%    \end{macrocode}
-  % \changes{v0.1}{2017/12/04}{Added a spurious change log entry to show what a
-  % change \emph{within} an environment definition looks like.}
-%
-% The global lua variable |_ARGS| is created and then populated by commands
-% inside the environment.
-%    \begin{macrocode}
   \SetCharacterKey{#1}
   \luadirect{new_character(_GCHARACTERKEY)}
-  \luadirect{_ARGS = {} }
 }{%
-  % \luadirect{character = create_character(_ARGS)}
+  \gurps@char@checkandfixattrsandpoints
+
   \charactersection*{Basic Attributes}
   \gurps@char@basicattributes
   \charactersection*{Secondary Characteristics}
   \gurps@char@secondarycharacteristics
+  \charactersection*{Other}
+  \gurps@char@properties
   \charactersection*{Advantages}
   \gurps@char@advantages
   \charactersection*{Disadvantages}
@@ -579,7 +575,7 @@ Running "make install" installs the files in the local TeX tree.
 %\label{sec:secondary-characteristics}
 %
 % This section defines secondary characteristics (as \gurpsbook{Basic Set}).
-% Points are set in a later function \cs{gurps@char@checkandfixpoints} (TODO
+% Points are set in a later function \cs{gurps@char@checkandfixattrsandpoints} (TODO
 % make this command!)
 
 % \begin{macro}{\HP}
@@ -692,8 +688,7 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 
 % \begin{macro}{\advantage}
-% Adds an advantage to a character. NOTE: this only works in a |character| or
-% |lens| environment.
+% Adds an advantage to a character. NOTE: this only works in a |character|.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{nil}}{%
   \gurps@char@insertattr{%
@@ -751,10 +746,41 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand\skill{mom}{%
   % TODO sort out points for skills again
-  \gurps@char@insertattr{%
-    name={#1},%
-    type=skill,%
-    level=#3
+  % \StrBehind{foobar}{oo}
+  % \StrCut{#2}{/}\tmp@basedon\tmp@difficulty
+  % \StrBefore{foobar}{oo}
+  \IfValueTF{#2}{%
+    \makeatletter
+    \luadirect{tmpone = \luastring{\unexpanded{#1}}}
+    \luadirect{tmptwo = \luastring{\unexpanded{#2}}}
+    \luadirect{tmpthree = \luastring{\unexpanded{#3}}}
+    \luadirect{
+      basedon = tmptwo:gsub('/.*', '')
+      difficulty = tmptwo:gsub('.*/', '')
+      tex.sprint(
+        [[\gurps@char@insertattr{]]
+      .. [[name={]] .. tmpone .. [[},]]
+      .. [[type=skill,]]
+      .. [[basedon=]] .. basedon .. ','
+      .. [[difficulty=]] .. difficulty .. ','
+      .. [[level=]] .. tmpthree
+      .. "}"
+    )
+    }
+    \makeatother
+    % \gurps@char@insertattr{%
+    %   name={#1},%
+    %   type=skill,%
+    %   basedon=\luadirect{x = string.gsub(\luastring{#2}, "/.*", "") tex.sprint(x)},
+    %   difficulty=\luadirect{x = string.gsub(\luastring{#2}, ".*/", "") tex.sprint(x)},
+    %   level=#3
+    % }%
+  }{%
+    \gurps@char@insertattr{%
+      name={#1},%
+      type=skill,%
+      level=#3
+    }%
   }%
   % \IfNoValueTF{#2}%
   % {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
@@ -835,25 +861,17 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{environment}
 %
-% \begin{environment}{lens}
-% Like |character|, but it's a lens.
-%    \begin{macrocode}
-\newenvironment{lens}[1]{%
-  \luadirect{character = create_character({#1})}%
-}{%
-  \luadirect{print_character_as_lens()}
-}
-%    \end{macrocode}
-% \end{environment}
-%
 % \begin{macro}{\gurps@char@print@attr}
-% It's like this: \cs{gurps@char@print@attr}\oarg{level}\marg{name}\oarg{points}
+% It's like this:
+% \cs{gurps@char@print@attr}\oarg{level/diceexpr}\marg{name}\oarg{points}. This
+% macro is usually called by the lua function |attr_to_tex| (which returns a
+% string)
 %    \begin{macrocode}
 \NewDocumentCommand{\gurps@char@print@attr}{omo}{%
   \IfValueTF{#3}{%
     \DeclareDocumentCommand{\tmp@points}{}{[#3]}%
   }{%
-    \DeclareDocumentCommand{\tmp@points}{}{[?]}%
+    \DeclareDocumentCommand{\tmp@points}{}{}%
   }%
   \IfValueTF{#1}{%
     #2~#1\tmp@points%
@@ -887,6 +905,14 @@ Running "make install" installs the files in the local TeX tree.
 \gurps@char@TraitListMaker{\gurps@char@spells}{is_spell}
 \gurps@char@TraitListMaker{\gurps@char@basicattributes}{is_basic_attribute}
 \gurps@char@TraitListMaker{\gurps@char@secondarycharacteristics}{is_secondary_characteristic}
+\gurps@char@TraitListMaker{\gurps@char@properties}{is_property}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@checkandfixattrsandpoints}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@checkandfixattrsandpoints}{}{%
+  \luadirect{check_and_fix_attrs_and_points(_GCHARACTERKEY)}%
+}
 %    \end{macrocode}
 % \end{macro}
 %    \begin{macrocode}
