@@ -419,7 +419,15 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 %
 % \begin{environment}{character}
-% This environment defines a `character' i.e.~anything with full stats.
+% This environment defines a `character' i.e.~anything with full stats. It takes
+% an \oarg{character key} which provides a means to access the character later
+% in the file. It is set with \cs{SetCharacterKey} and reset with
+% \cs{ResetCharacterKey}. In order to access the character later, just use
+% \cs{SetCharacterKey}\marg{character key}, use the commands (e.g.
+% \gurps@char@advantages) and then reset\footnote{Although resetting is not
+% strictly necessary, global variables are a Bad Thing\texttrademark{} so we
+% reset in order to emulate some kind of scope. Resetting just changes the
+% character key to \_.}.
 %    \begin{macrocode}
 \NewDocumentEnvironment{character}{O{_}}{%
   \SetCharacterKey{#1}
