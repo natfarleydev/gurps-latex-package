@@ -20,7 +20,7 @@ sided dice which are notated as \dice{$n$}[$m$], e.g. \dice{3}, \dice{4}[0], \di
 \section{A character appears}
 \label{sec:character-appears}
 
-\begin{character}
+\begin{character}[foo bar]
   \ST{11}
   \IQ{12}
   \DX{8}
@@ -37,13 +37,11 @@ sided dice which are notated as \dice{$n$}[$m$], e.g. \dice{3}, \dice{4}[0], \di
   \spell{\texttt{\char`\\ unexpanded}}{16}
 \end{character}
 
-% \begin{lens}{ST=11, IQ=12, DX=8}
-%   \advantage{\LaTeX{} skills}[15]
-%   \disadvantage{Bugs}
-%   \levelledadvantage{\TeX{} wizardry}{3}
-%   \skill{Computer Operations (\LaTeX{})}[IQ/Hard]{16}
-%   \spell{\texttt{\char`\\ unexpanded}}{16}
-% \end{lens}
+\subsection{Then the character is printed again \ldots{}}
+\label{sec:then-char-prepr}
+
+\printcharacter{foo bar}
+
 
 \section{Various disclaimers}
 \label{sec:various-disclaimers}

@@ -402,21 +402,31 @@ function check_and_fix_points(character_key)
     end
   end
 
-  skills_or_spells = filter(
+  skills_and_spells = filter(
     function(v) return is_skill(v) or is_spell(v) end,
     get_character(character_key)
   )
-  if skills_or_spells then
-    for _,v in ipairs(skills_or_spells) do
+  if skills_and_spells then
+    for _,v in ipairs(skills_and_spells) do
       add_skill_points_if_possible(v)
     end
   end
 
 end
 
+-- Sum the points for the character
+function sum_points(character_key)
+  local points = 0
+  for _,v in ipairs(get_character(character_key)) do
+    points = points + (v.points or 0)
+  end
+  return points
+end
+
 function check_and_fix_attrs_and_points(character_key)
   check_and_fix_attrs(character_key)
   check_and_fix_points(character_key)
+
 
   -- Sort the character
   function compare_only_alphanumeric(a, b)

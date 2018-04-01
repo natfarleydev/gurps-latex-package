@@ -461,7 +461,7 @@ Running "make install" installs the files in the local TeX tree.
   \def\gurps@char@insertattr@basedon{\unexpanded{[[#1]]}}}
 \define@key{gurps@char@insertattr}{difficulty}{%
   \def\gurps@char@insertattr@difficulty{\unexpanded{[[#1]]}}}
-\NewDocumentCommand{\gurps@char@insertattr}{O{_}m}{
+\NewDocumentCommand{\gurps@char@insertattr}{m}{
   \def\@myenvname{character}
   \ifx\@currenvir\@myenvname
   % pass
@@ -478,7 +478,7 @@ Running "make install" installs the files in the local TeX tree.
     difficulty=NotSet
   }
 
-  \setkeys{gurps@char@insertattr}{#2}
+  \setkeys{gurps@char@insertattr}{#1}
 
   \luadirect{x = {
       name=\gurps@char@insertattr@name,
@@ -505,12 +505,35 @@ Running "make install" installs the files in the local TeX tree.
         "Difficulty value '" .. x.difficulty .. "' is not valid!"
       )
     end
-    insert_attr(\luastring{#1}, x)
+    insert_attr(_GCHARACTERKEY, x)
   }
 }
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\printcharacter}
+% (This function is mostly for debug at the moment)
+%    \begin{macrocode}
+\NewDocumentCommand{\printcharacter}{m}{
+  \SetCharacterKey{#1}
+  \charactersection*{Basic Attributes}
+  \gurps@char@basicattributes
+  \charactersection*{Secondary Characteristics}
+  \gurps@char@secondarycharacteristics
+  \charactersection*{Other}
+  \gurps@char@properties
+  \charactersection*{Advantages}
+  \gurps@char@advantages
+  \charactersection*{Disadvantages}
+  \gurps@char@disadvantages
+  \charactersection*{Skills}
+  \gurps@char@skills
+  \charactersection*{Spells}
+  \gurps@char@spells
+  \ResetCharacterKey
+}
+%    \end{macrocode}
+% \end{macro}
 %\subsubsection{Basic attributes}
 %\label{sec:basic-attributes}
 %
@@ -742,72 +765,49 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 %
+% \begin{macro}{\gurps@char@SpellOrSkill}
+% Macro for skills or spells (since functionally they are the same in \gurps.)
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@SpellOrSkill}{mm}{
+  \NewDocumentCommand{#1}{mom}{%
+    \IfValueTF{##2}{%
+      \makeatletter
+      \luadirect{
+        tmpone = \luastring{\unexpanded{##1}}
+        tmptwo = \luastring{\unexpanded{##2}}
+        tmpthree = \luastring{\unexpanded{##3}}
+        basedon = tmptwo:gsub('/.*', '')
+        difficulty = tmptwo:gsub('.*/', '')
+        tex.sprint(
+        [[\gurps@char@insertattr{]]
+          .. [[name={]] .. tmpone .. [[},]]
+          .. [[type=#2,]]
+          .. [[basedon=]] .. basedon .. ','
+          .. [[difficulty=]] .. difficulty .. ','
+          .. [[level=]] .. tmpthree
+          .. "}"
+        )
+      }
+      \makeatother
+    }{%
+      \gurps@char@insertattr{%
+        name={##1},%
+        type=#2,%
+        level=##3
+      }%
+    }%
+  }
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\skill}
 %    \begin{macrocode}
-\NewDocumentCommand\skill{mom}{%
-  % TODO sort out points for skills again
-  % \StrBehind{foobar}{oo}
-  % \StrCut{#2}{/}\tmp@basedon\tmp@difficulty
-  % \StrBefore{foobar}{oo}
-  \IfValueTF{#2}{%
-    \makeatletter
-    \luadirect{tmpone = \luastring{\unexpanded{#1}}}
-    \luadirect{tmptwo = \luastring{\unexpanded{#2}}}
-    \luadirect{tmpthree = \luastring{\unexpanded{#3}}}
-    \luadirect{
-      basedon = tmptwo:gsub('/.*', '')
-      difficulty = tmptwo:gsub('.*/', '')
-      tex.sprint(
-        [[\gurps@char@insertattr{]]
-      .. [[name={]] .. tmpone .. [[},]]
-      .. [[type=skill,]]
-      .. [[basedon=]] .. basedon .. ','
-      .. [[difficulty=]] .. difficulty .. ','
-      .. [[level=]] .. tmpthree
-      .. "}"
-    )
-    }
-    \makeatother
-    % \gurps@char@insertattr{%
-    %   name={#1},%
-    %   type=skill,%
-    %   basedon=\luadirect{x = string.gsub(\luastring{#2}, "/.*", "") tex.sprint(x)},
-    %   difficulty=\luadirect{x = string.gsub(\luastring{#2}, ".*/", "") tex.sprint(x)},
-    %   level=#3
-    % }%
-  }{%
-    \gurps@char@insertattr{%
-      name={#1},%
-      type=skill,%
-      level=#3
-    }%
-  }%
-  % \IfNoValueTF{#2}%
-  % {\luadirect{_ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
-  % {%
-  %   \luadirect{%
-  %     _ARGS.skills[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[\unexpanded{#2}]]}
-  %   }%
-  % }%
-}
+\gurps@char@SpellOrSkill{\skill}{skill}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\spell}
 %    \begin{macrocode}
-\NewDocumentCommand\spell{mom}{%
-  \gurps@char@insertattr{%
-    name={#1},%
-    type=spell,%
-    level=#3
-  }%
-  % \IfNoValueTF{#2}%
-  % {\luadirect{_ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3}}}%
-  % {%
-  %   \luadirect{%
-  %     _ARGS.spells[ [[\unexpanded{#1}]] ] = {name=[[\unexpanded{#1}]], value=#3, difficulty=[[\unexpanded{#2}]]}%
-  %   }%
-  % }%
-}
+\gurps@char@SpellOrSkill{\spell}{spell}
 %    \end{macrocode}
 % \end{macro}
 
@@ -885,11 +885,18 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\gurps@char@TraitListMaker}
 %    \begin{macrocode}
 \NewDocumentCommand{\gurps@char@TraitListMaker}{mm}{
-  \NewDocumentCommand{#1}{O{_}}{%
+  \NewDocumentCommand{#1}{}{%
     \makeatletter%
-    \luadirect{traitlistmaker(#2, \luastring{##1})}%
+    \luadirect{traitlistmaker(#2, _GCHARACTERKEY)}%
     \makeatother%
   }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@totalpoints}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@totalpoints}{O{_}}{%
+  \luadirect{tex.sprint(sum_points(\luastring{\unexpanded{#1}}))}~pt%
 }
 %    \end{macrocode}
 % \end{macro}
