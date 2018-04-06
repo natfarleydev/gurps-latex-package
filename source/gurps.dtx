@@ -138,21 +138,23 @@ Running "make install" installs the files in the local TeX tree.
 %
 %
 %\section{Quickstart}
-% The following commands are provided by this package:
-% \begin{center}
-% \small
+% A brief overview of the commands in this package can be found in \autoref{tab:basic-commands}.
+% \begin{table}[t]
+%   \centering
+%   \caption{Basic commands in \texttt{gurps} package.}
+%   \label{tab:basic-commands}
+%   \small
 %   \begin{tabularx}{0.99\linewidth}{lX}\hline
-%   \textbf{Macro} & \textbf{Example} \\\hline
-%     \cs{dice}\marg{no.~of~dice}\oarg{modifier} & \dice{3}[2] \\\hline
-%     \cs{gurpsbook}\marg{name of book}\oarg{page(s)} & \gurpsbook{Zombies}[1] \\\hline
-%     \cs{gurps} & \gurps \\\hline
-%     \cs{SJGamesOnlinePolicyDisclaimer} & \SJGamesOnlinePolicyDisclaimer\\\hline
-%     \cs{SJGamesOnlinePolicyNotice} & \SJGamesOnlinePolicyNotice\\\hline
-%     \scalebox{0.8}[1]{\cs{SJGamesOnlinePolicyGameAid}}\marg{author name} & \SJGamesOnlinePolicyGameAid{AUTHOR NAME}\\\hline
-%   \end{tabularx}
-% \end{center}
-%
-% This package also provides a |character| environment (see section~\ref{sec:character-creation})
+%       \textbf{Macro} & \textbf{Example} \\\hline
+%       \cs{dice}\marg{no.~of~dice}\oarg{modifier} & \dice{3}[2] \\\hline
+%       \cs{gurpsbook}\marg{name of book}\oarg{page(s)} & \gurpsbook{Zombies}[1] \\\hline
+%       \cs{gurps} & \gurps \\\hline
+%       \cs{SJGamesOnlinePolicyDisclaimer} & \SJGamesOnlinePolicyDisclaimer\\\hline
+%       \cs{SJGamesOnlinePolicyNotice} & \SJGamesOnlinePolicyNotice\\\hline
+%       \scalebox{0.8}[1]{\cs{SJGamesOnlinePolicyGameAid}}\marg{author name} & \SJGamesOnlinePolicyGameAid{AUTHOR NAME}\\\hline
+%       \texttt{character} environment, \cs{ST}, \cs{advantage}, etc. &  See \autoref{sec:character-creation}
+%     \end{tabularx}
+%   \end{table}
 %
 %
 % \section{In-depth usage}
@@ -236,7 +238,7 @@ Running "make install" installs the files in the local TeX tree.
 % \DescribeMacro{\SJGamesOnlinePolicyNotice}
 % \DescribeMacro{\SJGamesOnlinePolicyGameAid}
 % The macros \cs{SJGamesOnlinePolicyDisclaimer}, \cs{SJGamesOnlinePolicyNotice}
-% and \cs{SJGamesOnlinePolicyGameAid}\marg{author name} provide common
+% and \linebreak\cs{SJGamesOnlinePolicyGameAid}\marg{author name} provide common
 % boilerplate statements taken directly from
 % \href{http://www.sjgames.com/general/online_policy.html}{SJGames online policy}
 % with small modifications to make them more suitable to game aids
@@ -332,21 +334,6 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{rollagainst}
-% A number to roll against as \rollagainst{16} or \rollagainst{6}.
-%    \begin{macrocode}
-\NewDocumentCommand{\rollagainst}{m}{%
-  \textbf{#1}%
-  % \hspace{2pt}%
-  % \tikz[overlay]{%
-  %   \node[fill=black!20, text=black, inner sep=0pt, anchor=text, rectangle, rounded
-  %   corners=1mm, minimum size=width("16 ")] {\parbox{\widthof{16}}{\centering #1}};%
-  % }%
-  % \phantom{16}%
-  % \hspace{2pt}%
-}
-%    \end{macrocode}
-% \end{macro}
 % \begin{macro}{\SJGames}
 %    \begin{macrocode}
 \NewDocumentCommand{\SJGames}{s}{%
@@ -424,7 +411,7 @@ Running "make install" installs the files in the local TeX tree.
 % in the file. It is set with \cs{SetCharacterKey} and reset with
 % \cs{ResetCharacterKey}. In order to access the character later, just use
 % \cs{SetCharacterKey}\marg{character key}, use the commands (e.g.
-% \gurps@char@advantages) and then reset\footnote{Although resetting is not
+% \cs{gurps@char@advantages}) and then reset\footnote{Although resetting is not
 % strictly necessary, global variables are a Bad Thing\texttrademark{} so we
 % reset in order to emulate some kind of scope. Resetting just changes the
 % character key to \_.}.
@@ -606,9 +593,9 @@ Running "make install" installs the files in the local TeX tree.
 %\label{sec:secondary-characteristics}
 %
 % This section defines secondary characteristics (as \gurpsbook{Basic Set}).
-% Points are set in a later function \cs{gurps@char@checkandfixattrsandpoints} (TODO
-% make this command!)
-
+% Points are set in a later function \cs{gurps@char@checkandfixattrsandpoints}
+% if they are not set here.
+% 
 % \begin{macro}{\HP}
 % Sets the HP of the current character
 %    \begin{macrocode}
@@ -916,10 +903,30 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\gurps@char@disadvantages}
 %    \begin{macrocode}
 \gurps@char@TraitListMaker{\gurps@char@disadvantages}{is_disadvantage}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@skills}
+%    \begin{macrocode}
 \gurps@char@TraitListMaker{\gurps@char@skills}{is_skill}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@spells}
+%    \begin{macrocode}
 \gurps@char@TraitListMaker{\gurps@char@spells}{is_spell}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@basicattributes}
+%    \begin{macrocode}
 \gurps@char@TraitListMaker{\gurps@char@basicattributes}{is_basic_attribute}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@secondarycharacteristics}
+%    \begin{macrocode}
 \gurps@char@TraitListMaker{\gurps@char@secondarycharacteristics}{is_secondary_characteristic}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@properties}
+%    \begin{macrocode}
 \gurps@char@TraitListMaker{\gurps@char@properties}{is_property}
 %    \end{macrocode}
 % \end{macro}
