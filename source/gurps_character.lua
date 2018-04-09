@@ -89,7 +89,8 @@ enums.type = _identity_pairs_tbl({"advantage" ,
                                  "spell" ,
                                  "basic_attribute" ,
                                  "secondary_characteristic" ,
-                                 "attack",
+                                 "melee_attack",
+                                 "ranged_attack",
                                  "property"})
 enums.difficulty = {
   easy="Easy",
@@ -180,8 +181,14 @@ function is_property(attr)
   return attr.type == "property"
 end
 
+function is_melee_attack(attr)
+  return attr.type == enums.type.melee_attack
+end
+function is_ranged_attack(attr)
+  return attr.type == enums.type.ranged_attack
+end
 function is_attack(attr)
-  return attr.type == enums.type.attack
+  return is_ranged_attack(attr) or is_melee_attack(attr)
 end
 
 function is_valid_type(t)
@@ -263,6 +270,23 @@ function traitlistmaker(predicate, character_key)
   end
   s = s .. [[ \end{charactertraitlist}]]
   tex.sprint(s)
+end
+
+function meleeattacklist(character_key)
+  melee_attacks = filter(is_melee_attack, get_character(character_key))
+  if melee_attacks then
+    for _,attack in ipairs(melee_attacks) do
+      tex.sprint([[\makeatletter]])
+      tex.print([[\gurps@char@print@meleeattack]]
+          .. "{" .. attack.name .. "}"
+          .. "{" .. tostring(attack.level) .. "}"
+          .. "{" .. attack.damage .. "}"
+          .. "{" .. attack.reach .. "}"
+          .. "{" .. attack.notes .. "}"
+      )
+      tex.sprint([[\makeatother]])
+    end
+  end
 end
 
 function check_and_fix_attrs(character_key)

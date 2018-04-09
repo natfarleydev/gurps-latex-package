@@ -193,6 +193,7 @@ Running "make install" installs the files in the local TeX tree.
 %   \advantage{Natural afro}[1]
 %   \disadvantage{Big teeth}[-1]
 %   \skill{Nunchuck}[DX/Easy]{16}
+%   \meleeattack{Punch}{18}{5d cr}{C,1}[Believe it!]
 % \end{character}
 % \end{verbatim}
 %
@@ -205,6 +206,7 @@ Running "make install" installs the files in the local TeX tree.
 %   \advantage{\TeX-nical afro}[1]
 %   \disadvantage{Big teeth}[-1]
 %   \skill{Nunchuck}[DX/Easy]{16}
+%   \meleeattack{Punch}{18}{5d cr}{C,1}[Believe it!]
 % \end{character}
 %
 %
@@ -436,6 +438,11 @@ Running "make install" installs the files in the local TeX tree.
   \gurps@char@skills
   \charactersection*{Spells}
   \gurps@char@spells
+  \charactersection*{Attacks}
+  None here!
+  \charactersection*{Skills}
+  Maybe one day there will be some
+  \gurps@char@meleeattacks
   \ResetCharacterKey
 }
 %    \end{macrocode}
@@ -450,6 +457,8 @@ Running "make install" installs the files in the local TeX tree.
   \def\gurps@char@insertattr@type{\unexpanded{[[#1]]}}}
 \define@key{gurps@char@insertattr}{level}{%
   \def\gurps@char@insertattr@level{#1}}
+\define@key{gurps@char@insertattr}{diceexpr}{%
+  \def\gurps@char@insertattr@diceexpr{\luastring{#1}}}
 \define@key{gurps@char@insertattr}{points}{%
   \def\gurps@char@insertattr@points{#1}}
 \define@key{gurps@char@insertattr}{basedon}{%
@@ -470,7 +479,8 @@ Running "make install" installs the files in the local TeX tree.
     points=nil,
     level=nil,
     basedon=DX,
-    difficulty=NotSet
+    difficulty=NotSet,
+    diceexpr=nil,
   }
 
   \setkeys{gurps@char@insertattr}{#1}
@@ -481,7 +491,8 @@ Running "make install" installs the files in the local TeX tree.
       points=\gurps@char@insertattr@points,
       level=\gurps@char@insertattr@level,
       basedon=\gurps@char@insertattr@basedon,
-      difficulty=\gurps@char@insertattr@difficulty
+      difficulty=\gurps@char@insertattr@difficulty,
+      diceexpr=\gurps@char@insertattr@diceexpr
     }
   }
   \luadirect{
@@ -525,10 +536,28 @@ Running "make install" installs the files in the local TeX tree.
   \gurps@char@skills
   \charactersection*{Spells}
   \gurps@char@spells
+  \charactersection*{Attacks}
+  \gurps@char@meleeattacks
   \ResetCharacterKey
 }
 %    \end{macrocode}
 % \end{macro}
+%
+% \begin{macro}{\gurps@char@getattrlevel}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@getattrlevel}{m}{%
+  \luadirect{
+    x = filter({name=\luastring{#1}}, get_character(_GCHARACTERKEY))
+    if x then
+      tex.sprint(x.level)
+    else
+      tex.sprint([[\PackageError{gurps}{Stat '#1' not found!}]])
+    end
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% 
 %\subsubsection{Basic attributes}
 %\label{sec:basic-attributes}
 %
@@ -677,6 +706,32 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
+% 
+% \begin{macro}{\thr}
+% Sets the thr of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\thr}{m}{
+  \gurps@char@insertattr{
+    name=thr,
+    type=property,
+    diceexpr=#1
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\sw}
+% Sets the sw of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\sw}{m}{
+  \gurps@char@insertattr{
+    name=sw,
+    type=property,
+    diceexpr=#1
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
 
 % \begin{macro}{\basicspeed}
 % Sets the Basic Speed of the current character
@@ -705,6 +760,90 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
+% \begin{macro}{\gurps@char@insertattack}
+%    \begin{macrocode}
+\define@key{gurps@char@insertattack}{name}{
+  \def\gurps@char@insertattack@name{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{type}{
+  \def\gurps@char@insertattack@type{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{damage}{
+  \def\gurps@char@insertattack@damage{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{level}{\def\gurps@char@insertattack@level{#1}}
+\define@key{gurps@char@insertattack}{reach}{
+  \def\gurps@char@insertattack@reach{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{range}{
+  \def\gurps@char@insertattack@range{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{notes}{
+  \def\gurps@char@insertattack@notes{\luastring{\unexpanded{#1}}}}
+\NewDocumentCommand{\gurps@char@insertattack}{m}{
+  \def\@myenvname{character}
+  \ifx\@currenvir\@myenvname
+  % pass
+  \else
+  \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
+  \fi
+
+  \setkeys{gurps@char@insertattack}{
+      name=NotSet,
+      type=NotSet,
+      damage=0d,
+      level=nil,
+      reach=NotSet,
+      range=NotSet,
+      notes={},
+  }
+
+  \setkeys{gurps@char@insertattack}{#1}
+
+  % \show\gurps@char@insertattack@name
+  % \show\gurps@char@insertattack@type
+  % \show\gurps@char@insertattack@level
+  % \show\gurps@char@insertattack@damage
+  % \show\gurps@char@insertattack@reach
+  % \show\gurps@char@insertattack@range
+  % \show\gurps@char@insertattack@notes
+  \luadirect{x = {
+      name=\gurps@char@insertattack@name,
+      type=\gurps@char@insertattack@type,
+      level=\gurps@char@insertattack@level,
+      damage=\gurps@char@insertattack@damage,
+      reach=\gurps@char@insertattack@reach,
+      range=\gurps@char@insertattack@range,
+      notes=\gurps@char@insertattack@notes,
+    }
+    if_else_packageerror(
+      function() return is_valid_type(x.type) end,
+      "Type '" .. x.type .. "' is not a valid attribute type!"
+        .. " Did you remember to set the type?"
+    )
+    insert_attr(_GCHARACTERKEY, x)
+  }
+}
+
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\meleeattack}
+%    \begin{macrocode}
+\NewDocumentCommand{\meleeattack}{mmmmO{}}{%
+  \gurps@char@insertattack{
+    name={#1},
+    type=melee_attack,
+    level=#2,
+    damage={#3},
+    reach={#4},
+    notes={#5},
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@print@meleeattack}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@print@meleeattack}{mmmmm}{%
+#1 (#2) #3: Reach: #4, Notes: #5%
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\advantage}
 % Adds an advantage to a character. NOTE: this only works in a |character|.
 %    \begin{macrocode}
@@ -837,7 +976,7 @@ Running "make install" installs the files in the local TeX tree.
     {\z@}%       indentation
     {\topsep}%   space before
     {-1em}%   space below
-    {\raggedright\normalsize\bfseries}% format of the text
+    {\raggedright\bfseries}% format of the text
 }
 % \NewDocumentCommand{\charactersection}{m}{%
 %   \noindent\par\noindent\textbf{\large #1}\\\noindent%
@@ -864,15 +1003,23 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand{\gurps@char@print@attr}{omo}{%
   \IfValueTF{#3}{%
-    \DeclareDocumentCommand{\tmp@points}{}{[#3]}%
+    \def\tmp@points{[#3]}%
   }{%
-    \DeclareDocumentCommand{\tmp@points}{}{}%
+    \def\tmp@points{}%
   }%
   \IfValueTF{#1}{%
     #2~#1\tmp@points%
   }{%
     #2\tmp@points%
   }%
+}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\gurps@char@meleeattacks}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@meleeattacks}{}{%
+  \luadirect{meleeattacklist(_GCHARACTERKEY)}
 }
 %    \end{macrocode}
 % \end{macro}
