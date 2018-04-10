@@ -35,12 +35,27 @@ sided dice which are notated as \dice{$n$}[$m$], e.g. \dice{3}, \dice{4}[0], \di
   \skill{\TeX pert!}[IQ/Wildcard]{16}
   \skill{Computer Operations (\LaTeX{})}[\TeX pert!/Hard]{16}
   \spell{\texttt{\char`\\ unexpanded}}{16}
+
+  \meleeattack{
+    name={Punch keyboard},
+    level=18,
+    damage={5d cr},
+    reach={C,1},
+    notes={Believe it!}
+  }
+  \rangedattack{
+    name={Throw keyboard},
+    level=21,
+    damage={1d cr},
+    range={100/1000},
+    notes={ARRRGGGG!}
+  }
 \end{character}
 
 \subsection{Then the character is printed again \ldots{}}
 \label{sec:then-char-prepr}
 
-\printcharacter{foo bar}
+\printcharacter[foo bar]
 
 
 \section{Various disclaimers}

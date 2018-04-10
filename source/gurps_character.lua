@@ -289,6 +289,23 @@ function meleeattacklist(character_key)
   end
 end
 
+function rangedattacklist(character_key)
+  ranged_attacks = filter(is_ranged_attack, get_character(character_key))
+  if ranged_attacks then
+    for _,attack in ipairs(ranged_attacks) do
+      tex.sprint([[\makeatletter]])
+      tex.print([[\gurps@char@print@rangedattack]]
+          .. "{" .. attack.name .. "}"
+          .. "{" .. tostring(attack.level) .. "}"
+          .. "{" .. attack.damage .. "}"
+          .. "{" .. attack.range .. "}"
+          .. "{" .. attack.notes .. "}"
+      )
+      tex.sprint([[\makeatother]])
+    end
+  end
+end
+
 function check_and_fix_attrs(character_key)
   function get(name)
     arr = filter({name=name}, get_character(character_key))

@@ -193,7 +193,13 @@ Running "make install" installs the files in the local TeX tree.
 %   \advantage{Natural afro}[1]
 %   \disadvantage{Big teeth}[-1]
 %   \skill{Nunchuck}[DX/Easy]{16}
-%   \meleeattack{Punch}{18}{5d cr}{C,1}[Believe it!]
+%   \meleeattack{
+%     name=Punch,
+%     level=18,
+%     damage={5d cr},
+%     reach={C,1},
+%     notes={Believe it!}
+%   }
 % \end{character}
 % \end{verbatim}
 %
@@ -206,7 +212,13 @@ Running "make install" installs the files in the local TeX tree.
 %   \advantage{\TeX-nical afro}[1]
 %   \disadvantage{Big teeth}[-1]
 %   \skill{Nunchuck}[DX/Easy]{16}
-%   \meleeattack{Punch}{18}{5d cr}{C,1}[Believe it!]
+%   \meleeattack{
+%     name={Punch},
+%     level=18,
+%     damage={5d cr},
+%     reach={C,1},
+%     notes={Believe it!}
+%   }
 % \end{character}
 %
 %
@@ -294,6 +306,7 @@ Running "make install" installs the files in the local TeX tree.
 
 \RequirePackage{hyperref}
 \RequirePackage{xstring}
+\RequirePackage{xkeyval}
 
 \luadirect{require("gurps.lua")}
 \luadirect{require("gurps_character.lua")}
@@ -424,25 +437,7 @@ Running "make install" installs the files in the local TeX tree.
 }{%
   \gurps@char@checkandfixattrsandpoints
 
-  \charactersection*{Basic Attributes}
-  \gurps@char@basicattributes
-  \charactersection*{Secondary Characteristics}
-  \gurps@char@secondarycharacteristics
-  \charactersection*{Other}
-  \gurps@char@properties
-  \charactersection*{Advantages}
-  \gurps@char@advantages
-  \charactersection*{Disadvantages}
-  \gurps@char@disadvantages
-  \charactersection*{Skills}
-  \gurps@char@skills
-  \charactersection*{Spells}
-  \gurps@char@spells
-  \charactersection*{Attacks}
-  None here!
-  \charactersection*{Skills}
-  Maybe one day there will be some
-  \gurps@char@meleeattacks
+  \printcharacter
   \ResetCharacterKey
 }
 %    \end{macrocode}
@@ -520,25 +515,26 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\printcharacter}
 % (This function is mostly for debug at the moment)
 %    \begin{macrocode}
-\NewDocumentCommand{\printcharacter}{m}{
-  \SetCharacterKey{#1}
-  \charactersection*{Basic Attributes}
-  \gurps@char@basicattributes
-  \charactersection*{Secondary Characteristics}
-  \gurps@char@secondarycharacteristics
-  \charactersection*{Other}
-  \gurps@char@properties
-  \charactersection*{Advantages}
-  \gurps@char@advantages
-  \charactersection*{Disadvantages}
-  \gurps@char@disadvantages
-  \charactersection*{Skills}
-  \gurps@char@skills
-  \charactersection*{Spells}
-  \gurps@char@spells
-  \charactersection*{Attacks}
-  \gurps@char@meleeattacks
-  \ResetCharacterKey
+\NewDocumentCommand{\printcharacter}{o}{%
+  \IfValueTF{#1}{\SetCharacterKey{#1}}{}%
+  \charactersection*{Basic Attributes}%
+  \gurps@char@basicattributes%
+  \charactersection*{Secondary Characteristics}%
+  \gurps@char@secondarycharacteristics%
+  \charactersection*{Other}%
+  \gurps@char@properties%
+  \charactersection*{Advantages}%
+  \gurps@char@advantages%
+  \charactersection*{Disadvantages}%
+  \gurps@char@disadvantages%
+  \charactersection*{Skills}%
+  \gurps@char@skills%
+  \charactersection*{Spells}%
+  \gurps@char@spells%
+  \charactersection*{Attacks:}%
+  \gurps@char@meleeattacks%
+  \gurps@char@rangedattacks%
+  \IfValueTF{#1}{ResetCharacterKey}{}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -763,19 +759,30 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\gurps@char@insertattack}
 %    \begin{macrocode}
 \define@key{gurps@char@insertattack}{name}{
-  \def\gurps@char@insertattack@name{\luastring{\unexpanded{#1}}}}
+  \def\gurps@char@insertattack@name{\luastring{#1}}}
 \define@key{gurps@char@insertattack}{type}{
-  \def\gurps@char@insertattack@type{\luastring{\unexpanded{#1}}}}
+  \def\gurps@char@insertattack@type{\luastring{#1}}}
 \define@key{gurps@char@insertattack}{damage}{
-  \def\gurps@char@insertattack@damage{\luastring{\unexpanded{#1}}}}
+  \def\gurps@char@insertattack@damage{\luastring{#1}}}
 \define@key{gurps@char@insertattack}{level}{\def\gurps@char@insertattack@level{#1}}
 \define@key{gurps@char@insertattack}{reach}{
-  \def\gurps@char@insertattack@reach{\luastring{\unexpanded{#1}}}}
+  \def\gurps@char@insertattack@reach{\luastring{#1}}}
 \define@key{gurps@char@insertattack}{range}{
-  \def\gurps@char@insertattack@range{\luastring{\unexpanded{#1}}}}
+  \def\gurps@char@insertattack@range{\luastring{#1}}}
 \define@key{gurps@char@insertattack}{notes}{
-  \def\gurps@char@insertattack@notes{\luastring{\unexpanded{#1}}}}
-\NewDocumentCommand{\gurps@char@insertattack}{m}{
+  \def\gurps@char@insertattack@notes{\luastring{#1}}}
+
+  % Set default values
+\setkeys{gurps@char@insertattack}{
+  name=NotSet,
+  type=NotSet,
+  damage=0d,
+  level=nil,
+  reach=NotSet,
+  range=NotSet,
+  notes={},
+}
+\NewDocumentCommand{\gurps@char@insertattack}{sm}{
   \def\@myenvname{character}
   \ifx\@currenvir\@myenvname
   % pass
@@ -783,7 +790,8 @@ Running "make install" installs the files in the local TeX tree.
   \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
   \fi
 
-  \setkeys{gurps@char@insertattack}{
+  \IfBooleanTF{#1}{}{
+    \setkeys{gurps@char@insertattack}{
       name=NotSet,
       type=NotSet,
       damage=0d,
@@ -791,10 +799,10 @@ Running "make install" installs the files in the local TeX tree.
       reach=NotSet,
       range=NotSet,
       notes={},
+    }
+
+    \setkeys{gurps@char@insertattack}{#2}
   }
-
-  \setkeys{gurps@char@insertattack}{#1}
-
   % \show\gurps@char@insertattack@name
   % \show\gurps@char@insertattack@type
   % \show\gurps@char@insertattack@level
@@ -823,24 +831,37 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
+% \begin{macro}{\rangedattack}
+%    \begin{macrocode}
+\NewDocumentCommand{\rangedattack}{m}{%
+  \setkeys{gurps@char@insertattack}{#1}%
+  \setkeys{gurps@char@insertattack}{type=ranged_attack}
+
+  \gurps@char@insertattack*{}
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@print@rangedattack}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@print@rangedattack}{mmmmm}{%
+  \charactersection*{\emph{#1 \fbox{#2} #3}} #5 \textit{Range: #4} %
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\meleeattack}
 %    \begin{macrocode}
-\NewDocumentCommand{\meleeattack}{mmmmO{}}{%
-  \gurps@char@insertattack{
-    name={#1},
-    type=melee_attack,
-    level=#2,
-    damage={#3},
-    reach={#4},
-    notes={#5},
-  }%
+\NewDocumentCommand{\meleeattack}{m}{%
+  \setkeys{gurps@char@insertattack}{#1}%
+  \setkeys{gurps@char@insertattack}{type=melee_attack}
+
+  \gurps@char@insertattack*{}
 }
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\gurps@char@print@meleeattack}
 %    \begin{macrocode}
 \NewDocumentCommand{\gurps@char@print@meleeattack}{mmmmm}{%
-#1 (#2) #3: Reach: #4, Notes: #5%
+  \charactersection*{\emph{#1 \fbox{#2} #3}} #5 \textit{Reach: #4} %
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1020,6 +1041,14 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand{\gurps@char@meleeattacks}{}{%
   \luadirect{meleeattacklist(_GCHARACTERKEY)}
+}
+%    \end{macrocode}
+% \end{macro}
+
+% \begin{macro}{\gurps@char@rangedattacks}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@rangedattacks}{}{%
+  \luadirect{rangedattacklist(_GCHARACTERKEY)}
 }
 %    \end{macrocode}
 % \end{macro}
