@@ -475,7 +475,7 @@ Running "make install" installs the files in the local TeX tree.
     level=nil,
     basedon=DX,
     difficulty=NotSet,
-    diceexpr=nil,
+    diceexpr=NotSet,
   }
 
   \setkeys{gurps@char@insertattr}{#1}
@@ -1055,10 +1055,10 @@ Running "make install" installs the files in the local TeX tree.
 
 % \begin{macro}{\gurps@char@TraitListMaker}
 %    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@TraitListMaker}{mm}{
+\NewDocumentCommand{\gurps@char@TraitListMaker}{mmO{nil}}{
   \NewDocumentCommand{#1}{}{%
     \makeatletter%
-    \luadirect{traitlistmaker(#2, _GCHARACTERKEY)}%
+    \luadirect{traitlistmaker(#2, _GCHARACTERKEY, #3)}%
     \makeatother%
   }%
 }
@@ -1093,12 +1093,12 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 % \begin{macro}{\gurps@char@basicattributes}
 %    \begin{macrocode}
-\gurps@char@TraitListMaker{\gurps@char@basicattributes}{is_basic_attribute}
+\gurps@char@TraitListMaker{\gurps@char@basicattributes}{is_basic_attribute}[basic_attributes_sorter]
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\gurps@char@secondarycharacteristics}
 %    \begin{macrocode}
-\gurps@char@TraitListMaker{\gurps@char@secondarycharacteristics}{is_secondary_characteristic}
+\gurps@char@TraitListMaker{\gurps@char@secondarycharacteristics}{is_secondary_characteristic}[secondary_characteristics_sorter]
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\gurps@char@properties}

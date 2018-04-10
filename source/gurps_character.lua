@@ -203,15 +203,6 @@ end
 
 function is_valid_difficulty(t)
   for k,v in pairs(enums.difficulty) do
-    print(v)
-    print(v)
-    print(v)
-    print(v)
-    print(v)
-    print(t)
-    print(t)
-    print(t)
-    print(t)
     if t == v then
       return v
     end
@@ -239,7 +230,7 @@ end
 function attr_to_tex(attr)
   s = [[\gurps@char@print@attr]]
   level_str = ""
-  if attr.level or attr.diceexpr then
+  if attr.level or attr.diceexpr ~= "NotSet" then
     level_str = "[" .. (attr.level or attr.diceexpr) .. "]"
   end
 
@@ -257,11 +248,38 @@ function attr_to_tex(attr)
   return s
 end
 
-function traitlistmaker(predicate, character_key)
+function basic_attributes_sorter(a, b)
+  x = {}
+  x['ST'] = 1
+  x['DX'] = 2
+  x['IQ'] = 3
+  x['HT'] = 4
+  return x[a.name] < x[b.name]
+end
+
+function secondary_characteristics_sorter(a, b)
+  x = {}
+  x['HP'] = 1
+  x['Per'] = 2
+  x['Will'] = 3
+  x['FP'] = 4
+  x['Basic Speed'] = 5
+  x['Basic Move'] = 6
+  return x[a.name] < x[b.name]
+end
+
+-- predicate to filter by
+-- character_key to get character with get_character()
+-- sortby function to sort by
+function traitlistmaker(predicate, character_key, sortby)
   s = [[\begin{charactertraitlist}]]
 
   array = filter(predicate, get_character(character_key))
   if array then
+    if sortby then
+      table.sort(array, sortby)
+    end
+
     for _,v in ipairs(array) do
       s = s .. [[ \item ]] .. attr_to_tex(v)
     end
