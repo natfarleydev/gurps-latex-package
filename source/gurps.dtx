@@ -351,6 +351,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\SJGames}
+% \SJGames printed with link (starred) or without (unstarred).
 %    \begin{macrocode}
 \NewDocumentCommand{\SJGames}{s}{%
     \IfBooleanTF#1%
@@ -362,6 +363,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\SJGamesOnlinePolicyDisclaimer}
+% Online policy disclaimer, basically straight from the \SJGames online policy.
 %    \begin{macrocode}
 \NewDocumentCommand{\SJGamesOnlinePolicyDisclaimer}{}{%
   The material presented here is my original creation, intended for use with the
@@ -371,7 +373,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 % 
-% \begin{macro}{\SJGamesOnlinePolicyDisclaimer}
+% \begin{macro}{\SJGamesOnlinePolicyNotice}
 % The disclaimer \emph{almost} as it appears on the online policy. The words
 % `the art' have been removed since by default no art (including logos) are
 % included in \LaTeX{} documents.
@@ -403,9 +405,48 @@ Running "make install" installs the files in the local TeX tree.
 %\subsection{Character environment}
 %\label{sec:character-environment}
 %
+% This section lists the |character| environment and all the macros that go into
+% it.
+%
+% \begin{tcolorbox}[title={Future plans!}]
+%   At the moment, there's a real mix of commands with and without |@| that
+%   should probably be switched to be internal/external so that the user can
+%   configure them (e.g. \cs{gurps@char@print@attr}). In the future, this will
+%   happen. For now \ldots{} feel free to edit them and see what happens! |:)|\\[1ex]
+%
+%   Also in the future, there will eventually be `theme' support such that the
+%   user can configure different ways of printing the character (e.g. disable
+%   points for a monster manual, use a |tcolorbox| for the statblock, etc.).
+%   Can't say when yet, but pull requests are welcome!
+% \end{tcolorbox}
+%
+% \begin{environment}{character, character*}
+% This environment defines a `character' i.e.~anything with full stats. A
+% |character*| will define a character but not print it.
+%
+% It takes \oarg{character key} which provides a means to access the character
+% later in the file. It is set with \cs{SetCharacterKey} and reset with
+% \cs{ResetCharacterKey}. In order to access the character later, just use
+% \cs{SetCharacterKey}\marg{character key}, use the commands (e.g.
+% \cs{gurps@char@advantages}) and then reset\footnote{Although resetting is not
+% strictly necessary, global variables are a Bad Thing\texttrademark{} so we
+% reset in order to emulate some kind of scope. Resetting just changes the
+% character key to \_.}.
+%    \begin{macrocode}
+\NewDocumentEnvironment{character}{sO{_}}{%
+  \SetCharacterKey{#2}%
+  \luadirect{new_character(_GCHARACTERKEY)}%
+}{%
+  \gurps@char@checkandfixattrsandpoints%
+  \IfBooleanTF{#1}{}{\printcharacter}%
+  \ResetCharacterKey%
+}
+%    \end{macrocode}
+% \end{environment}
+%
 % \begin{macro}{\SetCharacterKey}
-% Sets the key for the current character. This acts like a variable name but
-% only for characters.
+% Sets the key for the current character. This sets the lua string |_GCHARACTER|
+% which acts as a key for the global Lua table |_GCHARACTERS|.
 %    \begin{macrocode}
 \NewDocumentCommand{\SetCharacterKey}{m}{%
   \luadirect{_GCHARACTERKEY = \luastring{\unexpanded{#1}}}%
@@ -421,38 +462,19 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{environment}{character}
-% This environment defines a `character' i.e.~anything with full stats. It takes
-% an \oarg{character key} which provides a means to access the character later
-% in the file. It is set with \cs{SetCharacterKey} and reset with
-% \cs{ResetCharacterKey}. In order to access the character later, just use
-% \cs{SetCharacterKey}\marg{character key}, use the commands (e.g.
-% \cs{gurps@char@advantages}) and then reset\footnote{Although resetting is not
-% strictly necessary, global variables are a Bad Thing\texttrademark{} so we
-% reset in order to emulate some kind of scope. Resetting just changes the
-% character key to \_.}.
-%    \begin{macrocode}
-\NewDocumentEnvironment{character}{O{_}}{%
-  \SetCharacterKey{#1}
-  \luadirect{new_character(_GCHARACTERKEY)}
-}{%
-  \gurps@char@checkandfixattrsandpoints
-
-  \printcharacter
-  \ResetCharacterKey
-}
-%    \end{macrocode}
-% \end{environment}
 % 
 % \begin{macro}{\gurps@char@insertattr}
 % Macro for inserting an attribute to the character. Anything inserted with
 % |:nolatex:| in the name is not added to the character. (This is to aid
 % importing directly from a |*.gcs| file.)
+%
+% First, we define the |xkeval| keys for the function. These are set up to
+% convert the values directly into the right Lua types.
 %    \begin{macrocode}
 \define@key{gurps@char@insertattr}{name}{%
-  \def\gurps@char@insertattr@name{\unexpanded{[[#1]]}}}
+  \def\gurps@char@insertattr@name{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattr}{type}{%
-  \def\gurps@char@insertattr@type{\unexpanded{[[#1]]}}}
+  \def\gurps@char@insertattr@type{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattr}{level}{%
   \def\gurps@char@insertattr@level{#1}}
 \define@key{gurps@char@insertattr}{diceexpr}{%
@@ -460,9 +482,17 @@ Running "make install" installs the files in the local TeX tree.
 \define@key{gurps@char@insertattr}{points}{%
   \def\gurps@char@insertattr@points{#1}}
 \define@key{gurps@char@insertattr}{basedon}{%
-  \def\gurps@char@insertattr@basedon{\unexpanded{[[#1]]}}}
+  \def\gurps@char@insertattr@basedon{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattr}{difficulty}{%
-  \def\gurps@char@insertattr@difficulty{\unexpanded{[[#1]]}}}
+  \def\gurps@char@insertattr@difficulty{\luastring{\unexpanded{#1}}}}
+%    \end{macrocode}
+% Then we define \cs{gurps@char@insertattr}\marg{key-value pairs}. The macro
+% first checks we are in a |character| environment (throwing an error if we are
+% not), defines the keys, then does the Lua stuff.
+%
+% Side note: anything with |:nolatex:| in the name is discarded and not put into
+% the character.
+%    \begin{macrocode}
 \NewDocumentCommand{\gurps@char@insertattr}{m}{
   \def\@myenvname{character}
   \ifx\@currenvir\@myenvname
@@ -736,13 +766,21 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 
 % \begin{macro}{\DR}
-% Sets the DR of the current character
+% Sets the DR of the current character. Takes \cs{DR}\oarg{specialisation}\marg{level}.
 %    \begin{macrocode}
-\NewDocumentCommand{\DR}{m}{
-  \gurps@char@insertattr{
-    name=DR,
-    type=property,
-    level=#1
+\NewDocumentCommand{\DR}{om}{
+  \IfValueTF{#1}{%
+    \gurps@char@insertattr{%
+      name={DR (#1)},%
+      type=property,%
+      level=#2%
+    }%%
+  }{%
+    \gurps@char@insertattr{%
+      name=DR,%
+      type=property,%
+      level=#2%
+    }%
   }%
 }
 %    \end{macrocode}
@@ -959,29 +997,45 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 %
 % \begin{macro}{\gurps@char@SpellOrSkill}
-% Macro for skills or spells (since functionally they are the same in \gurps.)
+% Macro for skills or spells (since functionally they are the same in \gurps.).
+% The \oarg{points} can be a specifier e.g. |DX/Easy| or points e.g. |48|.
 %    \begin{macrocode}
 \NewDocumentCommand{\gurps@char@SpellOrSkill}{mm}{
   \NewDocumentCommand{#1}{mom}{%
     \IfValueTF{##2}{%
-      \makeatletter
+      \makeatletter%
       \luadirect{
         tmpone = \luastring{\unexpanded{##1}}
         tmptwo = \luastring{\unexpanded{##2}}
         tmpthree = \luastring{\unexpanded{##3}}
-        basedon = tmptwo:gsub('/.*', '')
-        difficulty = tmptwo:gsub('.*/', '')
-        tex.sprint(
-        [[\gurps@char@insertattr{]]
-          .. [[name={]] .. tmpone .. [[},]]
-          .. [[type=#2,]]
-          .. [[basedon=]] .. basedon .. ','
-          .. [[difficulty=]] .. difficulty .. ','
-          .. [[level=]] .. tmpthree
-          .. "}"
-        )
-      }
-      \makeatother
+      }%
+      \IfInteger{##2}{%
+        \luadirect{
+          tex.sprint(
+          [[\gurps@char@insertattr{]]
+            .. [[name={]] .. tmpone .. [[},]]
+            .. [[type=#2,]]
+            .. [[points=##2,]]
+            .. [[level=]] .. tmpthree
+            .. "}"
+          )
+       } 
+      }{%
+        \luadirect{
+          basedon = tmptwo:gsub('/.*', '')
+          difficulty = tmptwo:gsub('.*/', '')
+          tex.sprint(
+          [[\gurps@char@insertattr{]]
+            .. [[name={]] .. tmpone .. [[},]]
+            .. [[type=#2,]]
+            .. [[basedon=]] .. basedon .. ','
+            .. [[difficulty=]] .. difficulty .. ','
+            .. [[level=]] .. tmpthree
+            .. "}"
+          )
+        }%
+      }%
+      \makeatother%
     }{%
       \gurps@char@insertattr{%
         name={##1},%
