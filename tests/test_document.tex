@@ -25,8 +25,8 @@ sided dice which are notated as \dice{$n$}[$m$], e.g. \dice{3}, \dice{4}[0], \di
   \IQ{12}
   \DX{8}
   \Per{15}
-  \advantage{\LaTeX{} skills}[15]
   \advantage{Zoology}
+  \advantage{\LaTeX{} skills}[15]
   \disadvantage{Fear of lions}
   \disadvantage{Bugs}
   \disadvantage{Apathy}
@@ -43,6 +43,13 @@ sided dice which are notated as \dice{$n$}[$m$], e.g. \dice{3}, \dice{4}[0], \di
     reach={C,1},
     notes={Believe it!}
   }
+  \meleeattack{
+    name={Slam keyboard},
+    level=16,
+    damage={10d cr},
+    reach={C,1},
+    notes={Believe it \emph{more!}}
+  }
   \rangedattack{
     name={Throw keyboard},
     level=21,
@@ -50,6 +57,16 @@ sided dice which are notated as \dice{$n$}[$m$], e.g. \dice{3}, \dice{4}[0], \di
     range={100/1000},
     notes={ARRRGGGG!}
   }
+\end{character}
+
+\subsection{Then print \emph{another} character }
+\label{sec:then-print-emph}
+
+This character purposefully has no skills, advantages or disadvantages to check
+that they are not printed if needed.
+
+\begin{character}
+  \spell{Foo bar?}{40}
 \end{character}
 
 \subsection{Then the character is printed again \ldots{}}

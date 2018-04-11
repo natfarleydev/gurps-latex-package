@@ -296,6 +296,7 @@ Running "make install" installs the files in the local TeX tree.
 % Loading required libraries and the lua logic for this class.
 %    \begin{macrocode}
 %<*package>
+\RequirePackage{etoolbox}
 \RequirePackage{xparse}
 \RequirePackage{xspace}
 \RequirePackage{luacode}
@@ -444,7 +445,9 @@ Running "make install" installs the files in the local TeX tree.
 % \end{environment}
 % 
 % \begin{macro}{\gurps@char@insertattr}
-% Macro for inserting an attribute to the character.
+% Macro for inserting an attribute to the character. Anything inserted with
+% |:nolatex:| in the name is not added to the character. (This is to aid
+% importing directly from a |*.gcs| file.)
 %    \begin{macrocode}
 \define@key{gurps@char@insertattr}{name}{%
   \def\gurps@char@insertattr@name{\unexpanded{[[#1]]}}}
@@ -480,60 +483,102 @@ Running "make install" installs the files in the local TeX tree.
 
   \setkeys{gurps@char@insertattr}{#1}
 
-  \luadirect{x = {
-      name=\gurps@char@insertattr@name,
-      type=\gurps@char@insertattr@type,
-      points=\gurps@char@insertattr@points,
-      level=\gurps@char@insertattr@level,
-      basedon=\gurps@char@insertattr@basedon,
-      difficulty=\gurps@char@insertattr@difficulty,
-      diceexpr=\gurps@char@insertattr@diceexpr
-    }
-  }
-  \luadirect{
-    if_else_packageerror(
+  \expandarg \IfSubStr{\gurps@char@insertattr@name}{:nolatex:}{
+    % If tagged with :nolatex:, just stop this macro right here!
+  }{%
+    % Otherwise, continue
+    \luadirect{x = {
+        name=\gurps@char@insertattr@name,
+        type=\gurps@char@insertattr@type,
+        points=\gurps@char@insertattr@points,
+        level=\gurps@char@insertattr@level,
+        basedon=\gurps@char@insertattr@basedon,
+        difficulty=\gurps@char@insertattr@difficulty,
+        diceexpr=\gurps@char@insertattr@diceexpr
+      }
+
+      if_else_packageerror(
       function() return is_valid_type(x.type) end,
       "Type '" .. x.type .. "' is not a valid attribute type!"
-        .. " Did you remember to set the type?"
-    )
-    if_else_packageerror(
+      .. " Did you remember to set the type?"
+      )
+
+      if_else_packageerror(
       function() return is_valid_points(x.points) end,
       "Points value '" .. tostring(x.points) .. "' is not valid!"
-    )
-    if x.type == "skill" or x.type == "spell" then 
-      if_else_packageerror(
-        function() return is_valid_difficulty(x.difficulty) end,
-        "Difficulty value '" .. x.difficulty .. "' is not valid!"
       )
-    end
-    insert_attr(_GCHARACTERKEY, x)
-  }
+
+      if x.type == "skill" or x.type == "spell" then 
+        if_else_packageerror(
+          function() return is_valid_difficulty(x.difficulty) end,
+          "Difficulty value '" .. x.difficulty .. "' is not valid!"
+        )
+        end
+      insert_attr(_GCHARACTERKEY, x)
+    }%
+  }%
+  \normalexpandarg
 }
 %    \end{macrocode}
 % \end{macro}
+%
+%
+%\subsection{A few toggles}
+%\label{sec:toggles}
+%
+% These should be set by lua stuff.
+% 
+%    \begin{macrocode}
+\newtoggle{hasadvantages}
+\newtoggle{hasdisadvantages}
+\newtoggle{hastraits}
+\newtoggle{hasskills}
+\newtoggle{hasspells}
+\newtoggle{hasattacks}
+%    \end{macrocode}
+%
+% \begin{macro}{\gurps@char@checkandfixtoggles}
+% This command fixes all the toggles used in printing the character.
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@checkandfixtoggles}{}{%
+\luadirect{check_and_fix_toggles(_GCHARACTERKEY)}%
+}
+%    \end{macrocode}
+% \end{macro}
+%\subsection{Printing the character}
 %
 % \begin{macro}{\printcharacter}
 % (This function is mostly for debug at the moment)
 %    \begin{macrocode}
 \NewDocumentCommand{\printcharacter}{o}{%
   \IfValueTF{#1}{\SetCharacterKey{#1}}{}%
+  \gurps@char@checkandfixtoggles%
   \charactersection*{Basic Attributes}%
   \gurps@char@basicattributes%
   \charactersection*{Secondary Characteristics}%
   \gurps@char@secondarycharacteristics%
   \charactersection*{Other}%
   \gurps@char@properties%
-  \charactersection*{Advantages}%
-  \gurps@char@advantages%
-  \charactersection*{Disadvantages}%
-  \gurps@char@disadvantages%
-  \charactersection*{Skills}%
-  \gurps@char@skills%
-  \charactersection*{Spells}%
-  \gurps@char@spells%
-  \charactersection*{Attacks:}%
-  \gurps@char@meleeattacks%
-  \gurps@char@rangedattacks%
+  \iftoggle{hasadvantages}{%
+    \charactersection*{Advantages}%
+    \gurps@char@advantages%
+  }{}%
+  \iftoggle{hasdisadvantages}{%
+    \charactersection*{Disadvantages}%
+    \gurps@char@disadvantages%
+  }{}%
+  \iftoggle{hasskills}{%
+    \charactersection*{Skills}%
+    \gurps@char@skills%
+  }{}%
+  \iftoggle{hasspells}{%
+    \charactersection*{Spells}%
+    \gurps@char@spells%
+  }{}%
+  \iftoggle{hasattacks}{%
+    \charactersection*{\strut Attacks}\ \linebreak%
+    \gurps@char@attacks%
+  }{}%
   \IfValueTF{#1}{\ResetCharacterKey}{}%
 }
 %    \end{macrocode}
@@ -759,18 +804,18 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\gurps@char@insertattack}
 %    \begin{macrocode}
 \define@key{gurps@char@insertattack}{name}{
-  \def\gurps@char@insertattack@name{\luastring{#1}}}
+  \def\gurps@char@insertattack@name{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattack}{type}{
-  \def\gurps@char@insertattack@type{\luastring{#1}}}
+  \def\gurps@char@insertattack@type{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattack}{damage}{
-  \def\gurps@char@insertattack@damage{\luastring{#1}}}
+  \def\gurps@char@insertattack@damage{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattack}{level}{\def\gurps@char@insertattack@level{#1}}
 \define@key{gurps@char@insertattack}{reach}{
-  \def\gurps@char@insertattack@reach{\luastring{#1}}}
+  \def\gurps@char@insertattack@reach{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattack}{range}{
-  \def\gurps@char@insertattack@range{\luastring{#1}}}
+  \def\gurps@char@insertattack@range{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattack}{notes}{
-  \def\gurps@char@insertattack@notes{\luastring{#1}}}
+  \def\gurps@char@insertattack@notes{\luastring{\unexpanded{#1}}}}
 
   % Set default values
 \setkeys{gurps@char@insertattack}{
@@ -841,10 +886,10 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\gurps@char@print@rangedattack}
+% \begin{macro}{\gurps@char@print@attack}
 %    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@print@rangedattack}{mmmmm}{%
-  \charactersection*{\emph{#1 \fbox{#2} #3}} #5 \textit{Range: #4} %
+\NewDocumentCommand{\gurps@char@print@attack}{mmmO{RangeOrReach}mm}{%
+  \textbf{\emph{#1 \fbox{#2} #3}} #6 \textit{#4: #5} %
 }
 %    \end{macrocode}
 % \end{macro}
@@ -855,13 +900,6 @@ Running "make install" installs the files in the local TeX tree.
   \setkeys{gurps@char@insertattack}{type=melee_attack}
 
   \gurps@char@insertattack*{}
-}
-%    \end{macrocode}
-% \end{macro}
-% \begin{macro}{\gurps@char@print@meleeattack}
-%    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@print@meleeattack}{mmmmm}{%
-  \charactersection*{\emph{#1 \fbox{#2} #3}} #5 \textit{Reach: #4} %
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1011,8 +1049,24 @@ Running "make install" installs the files in the local TeX tree.
 %  |itemize*| from the |enumitem| package with some customisations
 %    \begin{macrocode}
 \NewDocumentEnvironment{charactertraitlist}{}
-{\noindent\begin{itemize*}[itemjoin={{; }},label=,afterlabel={},midpenalty=0]}
+{\noindent\begin{itemize*}[itemjoin={{; }},label=,afterlabel={}]}
   {\end{itemize*}}
+%    \end{macrocode}
+% \end{environment}
+% 
+% \begin{environment}{attacklist}
+%  We define the |attacktraitlist| to list the traits. By default, this is an
+%  |itemize*| from the |enumitem| package with some customisations
+%    \begin{macrocode}
+\NewDocumentEnvironment{attacklist}{}
+{%
+  \noindent%
+  \begin{itemize*}[%
+    itemjoin={\\},%
+    label={~--~},%
+    afterlabel={},%
+    ]%
+  }{\end{itemize*}}
 %    \end{macrocode}
 % \end{environment}
 %
@@ -1037,18 +1091,10 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
-% \begin{macro}{\gurps@char@meleeattacks}
+% \begin{macro}{\gurps@char@attacks}
 %    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@meleeattacks}{}{%
-  \luadirect{meleeattacklist(_GCHARACTERKEY)}
-}
-%    \end{macrocode}
-% \end{macro}
-
-% \begin{macro}{\gurps@char@rangedattacks}
-%    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@rangedattacks}{}{%
-  \luadirect{rangedattacklist(_GCHARACTERKEY)}
+\NewDocumentCommand{\gurps@char@attacks}{}{%
+  \luadirect{attacklist(_GCHARACTERKEY)}
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1069,6 +1115,11 @@ Running "make install" installs the files in the local TeX tree.
 \NewDocumentCommand{\gurps@char@totalpoints}{O{_}}{%
   \luadirect{tex.sprint(sum_points(\luastring{\unexpanded{#1}}))}~pt%
 }
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@traits}
+%    \begin{macrocode}
+\gurps@char@TraitListMaker{\gurps@char@traits}{is_trait}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\gurps@char@advantages}

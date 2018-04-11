@@ -14,6 +14,10 @@
 -- TODO find out how the lua table serialisation works and use that instead.
 require "gurps_tables"
 
+_GGURPS_CHARACTER_CONFIG = {
+  print_points=true,
+}
+
 function thrust_or_swing(typ, st)
   if st < 1 then
     return "0"
@@ -161,6 +165,11 @@ function is_disadvantage(attr)
   return attr.type == "disadvantage"
 end
 
+-- A trait is an advantage or a disadvantage
+function is_trait(attr)
+  return is_advantage(attr) or is_disadvantage(attr)
+end
+
 function is_skill(attr)
   return attr.type == "skill"
 end
@@ -235,11 +244,13 @@ function attr_to_tex(attr)
   end
 
   points_str = ""
-  if not is_property(attr) and not is_attack(attr) then
-    if attr.points then
-      points_str = "[" .. attr.points .. "]"
-    elseif attr.type ~= enums.type.property then
-      points_str = "[?]"
+  if _GGURPS_CHARACTER_CONFIG.print_points then
+    if not is_property(attr) and not is_attack(attr) then
+      if attr.points then
+        points_str = "[" .. attr.points .. "]"
+      elseif attr.type ~= enums.type.property then
+        points_str = "[?]"
+      end
     end
   end
 
@@ -290,37 +301,26 @@ function traitlistmaker(predicate, character_key, sortby)
   tex.sprint(s)
 end
 
-function meleeattacklist(character_key)
-  melee_attacks = filter(is_melee_attack, get_character(character_key))
-  if melee_attacks then
-    for _,attack in ipairs(melee_attacks) do
-      tex.sprint([[\makeatletter]])
-      tex.print([[\gurps@char@print@meleeattack]]
-          .. "{" .. attack.name .. "}"
-          .. "{" .. tostring(attack.level) .. "}"
-          .. "{" .. attack.damage .. "}"
-          .. "{" .. attack.reach .. "}"
-          .. "{" .. attack.notes .. "}"
-      )
-      tex.sprint([[\makeatother]])
+function attacklist(character_key)
+  attacks = filter(is_attack, get_character(character_key))
+  if attacks then
+    s = [[\makeatletter\begin{attacklist}]]
+    for _,attack in ipairs(attacks) do
+      if attack.range and attack.range ~= "NotSet" then
+        range_or_reach = "range"
+      else
+        range_or_reach = "reach"
+      end
+      s = s .. [[ \item \gurps@char@print@attack]]
+        .. "{" .. attack.name .. "}"
+        .. "{" .. tostring(attack.level) .. "}"
+        .. "{" .. attack.damage .. "}"
+        .. "[" .. range_or_reach:gsub("^%l", string.upper) .. "]"
+        .. "{" .. attack[range_or_reach] .. "}"
+        .. "{" .. attack.notes .. "}"
     end
-  end
-end
-
-function rangedattacklist(character_key)
-  ranged_attacks = filter(is_ranged_attack, get_character(character_key))
-  if ranged_attacks then
-    for _,attack in ipairs(ranged_attacks) do
-      tex.sprint([[\makeatletter]])
-      tex.print([[\gurps@char@print@rangedattack]]
-          .. "{" .. attack.name .. "}"
-          .. "{" .. tostring(attack.level) .. "}"
-          .. "{" .. attack.damage .. "}"
-          .. "{" .. attack.range .. "}"
-          .. "{" .. attack.notes .. "}"
-      )
-      tex.sprint([[\makeatother]])
-    end
+    s = s .. [[ \end{attacklist}\makeatother]]
+    tex.sprint(s)
   end
 end
 
@@ -500,4 +500,25 @@ function check_and_fix_attrs_and_points(character_key)
     get_character(character_key),
     compare_only_alphanumeric
   )
+end
+
+function check_and_fix_toggles(character_key)
+  c = get_character(character_key)
+  things = {
+    "advantage",
+    "disadvantage",
+    "trait",
+    "skill",
+    "spell",
+    "attack"
+  }
+  for _,v in ipairs(things) do
+    f = load([[l = filter(is_]] .. v .. [[, c)]])
+    f()
+    if l then
+      tex.sprint([[\toggletrue{has]] .. v .. [[s}]])
+    else
+      tex.sprint([[\togglefalse{has]] .. v .. [[s}]])
+    end
+  end
 end
