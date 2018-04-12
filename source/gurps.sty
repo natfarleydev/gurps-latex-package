@@ -1,0 +1,594 @@
+%%
+%% This is file `gurps.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% gurps.dtx  (with options: `package')
+%% -------:| -----------------------------------------------------------------
+%%   gurps:| A LaTeX package for GURPS typesetting
+%%  Author:| Nathanael Farley
+%%  E-mail:| nasfarley88@gmail.com
+%% License:| Released under the LaTeX Project Public License v1.3c or later
+%%     See:| http://www.latex-project.org/lppl.txt
+%% 
+\NeedsTeXFormat{LaTeX2e}[1999/12/01]
+\ProvidesPackage{gurps}
+    [1970/01/01 v0.3 A LaTeX package for GURPS typesetting]
+\RequirePackage{etoolbox}
+\RequirePackage{xparse}
+\RequirePackage{xspace}
+\RequirePackage{luacode}
+\RequirePackage{tikz}
+\RequirePackage{calc}
+\PassOptionsToPackage{inline}{enumitem}
+\RequirePackage[inline]{enumitem}
+
+\RequirePackage{hyperref}
+\RequirePackage{xstring}
+\RequirePackage{xkeyval}
+
+\luadirect{require("gurps.lua")}
+\luadirect{require("gurps_character.lua")}
+\NewDocumentCommand{\gurps}{s}{%
+    \IfBooleanTF#1
+    % With star
+    {\href{http://www.sjgames.com/gurps/}{\textbf{\textit{GURPS}}\xspace}}
+    % Without star
+    {\textbf{\textit{GURPS}}\xspace}%
+}
+\NewDocumentCommand{\dice}{mO{0}}{%
+  \luadirect{print_dice([[#1]], [[#2]])}%
+}
+\NewDocumentCommand{\gurps@porpp}{m}{\IfInteger{#1}{p.}{pp.}}
+\NewDocumentCommand{\gurpsbook}{mo}{%
+  \textbf{\textit{\gurps #1}}\IfValueT{#2}{ \gurps@porpp{#2}~#2}%
+}
+\NewDocumentCommand{\SJGames}{s}{%
+    \IfBooleanTF#1%
+    % With star
+    {\href{http://www.sjgames.com/}{Steve~Jackson~Games}\xspace}%
+    % Without star
+    {Steve~Jackson~Games\xspace}%
+}
+\NewDocumentCommand{\SJGamesOnlinePolicyDisclaimer}{}{%
+  The material presented here is my original creation, intended for use with the
+  \gurps* system from \SJGames*. This material is not official and is
+  not endorsed by \SJGames.
+}
+\NewDocumentCommand{\SJGamesOnlinePolicyNotice}{}{%
+  \gurps* is a registered trademark of \SJGames*, and is copyrighted by
+  \SJGames. All rights are reserved by \SJGames. This material is used
+  here in accordance with the SJ Games
+  \href{http://www.sjgames.com/general/online_policy.html}{online policy}.
+}
+\NewDocumentCommand{\SJGamesOnlinePolicyGameAid}{m}{%
+  \gurps* is a trademark of \SJGames*, and its rules and art are
+  copyrighted by \SJGames*. All rights are reserved by
+  \SJGames. This game aid is the original creation of #1 and
+  is released for free distribution, and not for resale, under the
+  permissions granted in the
+  \href{http://www.sjgames.com/general/online_policy.html}%
+        {\SJGames Online Policy}.
+}
+\NewDocumentEnvironment{character}{sO{_}}{%
+  \SetCharacterKey{#2}%
+  \luadirect{new_character(_GCHARACTERKEY)}%
+}{%
+  \gurps@char@checkandfixattrsandpoints%
+  \IfBooleanTF{#1}{}{\printcharacter}%
+  \ResetCharacterKey%
+}
+\NewDocumentCommand{\SetCharacterKey}{m}{%
+  \luadirect{_GCHARACTERKEY = \luastring{\unexpanded{#1}}}%
+}
+\NewDocumentCommand{\ResetCharacterKey}{}{%
+  \SetCharacterKey{_}%
+}
+\define@key{gurps@char@insertattr}{name}{%
+  \def\gurps@char@insertattr@name{\unexpanded{[[#1]]}}} %TODO check this << has
+                                %fixed it
+\define@key{gurps@char@insertattr}{type}{%
+  \def\gurps@char@insertattr@type{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattr}{level}{%
+  \def\gurps@char@insertattr@level{#1}}
+\define@key{gurps@char@insertattr}{diceexpr}{%
+  \def\gurps@char@insertattr@diceexpr{\luastring{#1}}}
+\define@key{gurps@char@insertattr}{points}{%
+  \def\gurps@char@insertattr@points{#1}}
+\define@key{gurps@char@insertattr}{basedon}{%
+  \def\gurps@char@insertattr@basedon{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattr}{difficulty}{%
+  \def\gurps@char@insertattr@difficulty{\luastring{\unexpanded{#1}}}}
+\NewDocumentCommand{\gurps@char@insertattr}{m}{
+  \def\@myenvname{character}
+  \ifx\@currenvir\@myenvname
+  % pass
+  \else
+  \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
+  \fi
+
+  \setkeys{gurps@char@insertattr}{
+    name=NotSet,
+    type=NotSet,
+    points=nil,
+    level=nil,
+    basedon=DX,
+    difficulty=NotSet,
+    diceexpr=NotSet,
+  }
+
+  \setkeys{gurps@char@insertattr}{#1}
+
+  % If the name has the tag :nolatex:, don't add it! Otherwise, add it.
+  \luadirect{
+    if not string.find(\luastring{\gurps@char@insertattr@name}, \luastring{:nolatex:}) then
+      % If arg is blank (e.g. identity()), then this returns nil.
+      function identity(x)
+        return x
+      end
+
+      x = {
+        name=\gurps@char@insertattr@name,
+        type=\gurps@char@insertattr@type,
+        points=\gurps@char@insertattr@points,
+        level=identity(\gurps@char@insertattr@level),
+        basedon=\gurps@char@insertattr@basedon,
+        difficulty=\gurps@char@insertattr@difficulty,
+        diceexpr=\gurps@char@insertattr@diceexpr
+      }
+
+      if_else_packageerror(
+      function() return is_valid_type(x.type) end,
+      "Type '" .. x.type .. "' is not a valid attribute type!"
+      .. " Did you remember to set the type?"
+      )
+
+      if_else_packageerror(
+      function() return is_valid_points(x.points) end,
+      "Points value '" .. tostring(x.points) .. "' is not valid!"
+      )
+
+      if x.type == "skill" or x.type == "spell" then
+        if_else_packageerror(
+          function() return is_valid_difficulty(x.difficulty) end,
+          "Difficulty value '" .. x.difficulty .. "' is not valid!"
+        )
+        end
+      insert_attr(_GCHARACTERKEY, x)
+    end
+  }%
+}
+\newtoggle{hasadvantages}
+\newtoggle{hasdisadvantages}
+\newtoggle{hastraits}
+\newtoggle{hasskills}
+\newtoggle{hasspells}
+\newtoggle{hasattacks}
+\NewDocumentCommand{\gurps@char@checkandfixtoggles}{}{%
+\luadirect{check_and_fix_toggles(_GCHARACTERKEY)}%
+}
+\NewDocumentCommand{\printcharacter}{o}{%
+  \IfValueTF{#1}{\SetCharacterKey{#1}}{}%
+  \gurps@char@checkandfixtoggles%
+  \charactersection*{Basic Attributes}%
+  \gurps@char@basicattributes%
+  \charactersection*{Secondary Characteristics}%
+  \gurps@char@secondarycharacteristics%
+  \charactersection*{Other}%
+  \gurps@char@properties%
+  \iftoggle{hasadvantages}{%
+    \charactersection*{Advantages}%
+    \gurps@char@advantages%
+  }{}%
+  \iftoggle{hasdisadvantages}{%
+    \charactersection*{Disadvantages}%
+    \gurps@char@disadvantages%
+  }{}%
+  \iftoggle{hasskills}{%
+    \charactersection*{Skills}%
+    \gurps@char@skills%
+  }{}%
+  \iftoggle{hasspells}{%
+    \charactersection*{Spells}%
+    \gurps@char@spells%
+  }{}%
+  \iftoggle{hasattacks}{%
+    \charactersection*{\strut Attacks}\ \linebreak%
+    \gurps@char@attacks%
+  }{}%
+  \IfValueTF{#1}{\ResetCharacterKey}{}%
+}
+\NewDocumentCommand{\gurps@char@getattrlevel}{m}{%
+  \luadirect{
+    x = filter({name=\luastring{#1}}, get_character(_GCHARACTERKEY))
+    if x then
+      tex.sprint(x.level)
+    else
+      tex.sprint([[\PackageError{gurps}{Stat '#1' not found!}]])
+    end
+  }%
+}
+\NewDocumentCommand{\ST}{mO{nil}}{
+  \gurps@char@insertattr{
+    name=ST,
+    type=basic_attribute,
+    level=#1,
+    points=#2
+  }%
+}
+
+\NewDocumentCommand{\DX}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=DX,
+    type=basic_attribute,
+    level=#1,
+    points=#2
+  }%
+}
+
+\NewDocumentCommand{\IQ}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=IQ,
+    type=basic_attribute,
+    level=#1,
+    points=#2
+  }%
+}
+
+\NewDocumentCommand{\HT}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=HT,
+    type=basic_attribute,
+    level=#1,
+    points=#2
+  }%
+}
+\NewDocumentCommand{\HP}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=HP,
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
+
+\NewDocumentCommand{\Per}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=Per,
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
+
+\NewDocumentCommand{\Will}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=Will,
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
+
+\NewDocumentCommand{\FP}{mO{nil}}{%
+  \gurps@char@insertattr{
+    name=FP,
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
+
+\NewDocumentCommand{\SM}{m}{%
+  \gurps@char@insertattr{
+    name=SM,
+    type=property,
+    level=#1
+  }%
+}
+
+\NewDocumentCommand{\DR}{om}{
+  \IfValueTF{#1}{%
+    \gurps@char@insertattr{%
+      name={DR (#1)},%
+      type=property,%
+      level=#2%
+    }%%
+  }{%
+    \gurps@char@insertattr{%
+      name=DR,%
+      type=property,%
+      level=#2%
+    }%
+  }%
+}
+\NewDocumentCommand{\thr}{m}{
+  \gurps@char@insertattr{
+    name=thr,
+    type=property,
+    diceexpr=#1
+  }%
+}
+
+\NewDocumentCommand{\sw}{m}{
+  \gurps@char@insertattr{
+    name=sw,
+    type=property,
+    diceexpr=#1
+  }%
+}
+
+\NewDocumentCommand{\basicspeed}{mO{nil}}{
+  \gurps@char@insertattr{
+    name={Basic Speed},
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
+\NewDocumentCommand{\basicmove}{mO{nil}}{
+  \gurps@char@insertattr{
+    name={Basic Move},
+    type=secondary_characteristic,
+    level=#1,
+    points=#2
+  }%
+}
+
+\define@key{gurps@char@insertattack}{name}{
+  \def\gurps@char@insertattack@name{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{type}{
+  \def\gurps@char@insertattack@type{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{damage}{
+  \def\gurps@char@insertattack@damage{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{level}{\def\gurps@char@insertattack@level{#1}}
+\define@key{gurps@char@insertattack}{reach}{
+  \def\gurps@char@insertattack@reach{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{range}{
+  \def\gurps@char@insertattack@range{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattack}{notes}{
+  \def\gurps@char@insertattack@notes{\luastring{\unexpanded{#1}}}}
+
+  % Set default values
+\setkeys{gurps@char@insertattack}{
+  name=NotSet,
+  type=NotSet,
+  damage=0d,
+  level=nil,
+  reach=NotSet,
+  range=NotSet,
+  notes={},
+}
+\NewDocumentCommand{\gurps@char@insertattack}{sm}{
+  \def\@myenvname{character}
+  \ifx\@currenvir\@myenvname
+  % pass
+  \else
+  \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
+  \fi
+
+  \IfBooleanTF{#1}{}{
+    \setkeys{gurps@char@insertattack}{
+      name=NotSet,
+      type=NotSet,
+      damage=0d,
+      level=nil,
+      reach=NotSet,
+      range=NotSet,
+      notes={},
+    }
+
+    \setkeys{gurps@char@insertattack}{#2}
+  }
+  % \show\gurps@char@insertattack@name
+  % \show\gurps@char@insertattack@type
+  % \show\gurps@char@insertattack@level
+  % \show\gurps@char@insertattack@damage
+  % \show\gurps@char@insertattack@reach
+  % \show\gurps@char@insertattack@range
+  % \show\gurps@char@insertattack@notes
+  \luadirect{x = {
+      name=\gurps@char@insertattack@name,
+      type=\gurps@char@insertattack@type,
+      level=\gurps@char@insertattack@level,
+      damage=\gurps@char@insertattack@damage,
+      reach=\gurps@char@insertattack@reach,
+      range=\gurps@char@insertattack@range,
+      notes=\gurps@char@insertattack@notes,
+    }
+    if_else_packageerror(
+      function() return is_valid_type(x.type) end,
+      "Type '" .. x.type .. "' is not a valid attribute type!"
+        .. " Did you remember to set the type?"
+    )
+    insert_attr(_GCHARACTERKEY, x)
+  }
+}
+
+
+\NewDocumentCommand{\rangedattack}{m}{%
+  \setkeys{gurps@char@insertattack}{#1}%
+  \setkeys{gurps@char@insertattack}{type=ranged_attack}
+
+  \gurps@char@insertattack*{}
+}
+\NewDocumentCommand{\gurps@char@print@attack}{mmmO{RangeOrReach}mm}{%
+  \textbf{\textit{#1 \fbox{#2} #3}} #6 \textit{#4: #5}%
+}
+\NewDocumentCommand{\meleeattack}{m}{%
+  \setkeys{gurps@char@insertattack}{#1}%
+  \setkeys{gurps@char@insertattack}{type=melee_attack}
+
+  \gurps@char@insertattack*{}
+}
+\NewDocumentCommand{\advantage}{mO{nil}}{%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=advantage,%
+    points=#2%
+  }%
+}
+\NewDocumentCommand{\disadvantage}{mO{nil}}{%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=disadvantage,%
+    points=#2%
+  }%
+}
+\NewDocumentCommand{\levelledadvantage}{mmO{nil}}{%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=advantage,%
+    level=#2,
+    points=#3%
+  }%
+}
+\NewDocumentCommand{\levelleddisadvantage}{mmO{nil}}{%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=disadvantage,%
+    level=#2,
+    points=#3%
+  }%
+}
+\NewDocumentCommand{\gurps@char@SpellOrSkill}{mm}{
+  \NewDocumentCommand{#1}{mom}{%
+    \IfValueTF{##2}{%
+      \makeatletter%
+      \luadirect{
+        tmpone = \luastring{\unexpanded{##1}}
+        tmptwo = \luastring{\unexpanded{##2}}
+        tmpthree = \luastring{\unexpanded{##3}}
+      }%
+      \IfInteger{##2}{%
+        \luadirect{
+          tex.sprint(
+          [[\gurps@char@insertattr{]]
+            .. [[name={]] .. tmpone .. [[},]]
+            .. [[type=#2,]]
+            .. [[points=##2,]]
+            .. [[level=]] .. tmpthree
+            .. "}"
+          )
+       }
+      }{%
+        \luadirect{
+          basedon = tmptwo:gsub('/.*', '')
+          difficulty = tmptwo:gsub('.*/', '')
+          tex.sprint(
+          [[\gurps@char@insertattr{]]
+            .. [[name={]] .. tmpone .. [[},]]
+            .. [[type=#2,]]
+            .. [[basedon=]] .. basedon .. ','
+            .. [[difficulty=]] .. difficulty .. ','
+            .. [[level=]] .. tmpthree
+            .. "}"
+          )
+        }%
+      }%
+      \makeatother%
+    }{%
+      \gurps@char@insertattr{%
+        name={##1},%
+        type=#2,%
+        level=##3
+      }%
+    }%
+  }
+}
+\gurps@char@SpellOrSkill{\skill}{skill}
+\gurps@char@SpellOrSkill{\spell}{spell}
+
+\newcounter{charactertitle} % to keep LaTeX happy
+\newcommand{\charactertitlemark}[1]{} % ditto
+\newcommand\charactertitle{%
+  \@startsection{charactertitle}%
+  {100}%        level for secnumdepth and tocdepth
+  {\z@}%       indentation
+  {\topsep}%   space before
+  {\topsep}%   space below
+  {\raggedright\Large\bfseries}% format of the text
+}
+\newcounter{charactersection} % to keep LaTeX happy
+\newcommand{\charactersectionmark}[1]{} % ditto
+\newcommand\charactersection{%
+  \@startsection{charactersection}%
+    {101}%        level for secnumdepth and tocdepth
+    {\z@}%       indentation
+    {\topsep}%   space before
+    {-1em}%   space below
+    {\raggedright\bfseries}% format of the text
+}
+\NewDocumentEnvironment{charactertraitlist}{}
+{\noindent\begin{itemize*}[itemjoin={{; }},label=,afterlabel={}]}
+  {\end{itemize*}}
+\NewDocumentEnvironment{attacklist}{}
+{%
+  \noindent%
+  \begin{itemize}[%
+    % itemjoin={\\},% TODO figure out why this causes a problem!
+    label={--},%
+    wide,
+    nosep
+    % afterlabel={},% Default of ~ is good
+    ]%
+  }{\end{itemize}}
+\NewDocumentCommand{\gurps@char@print@attr}{omo}{%
+  \IfValueTF{#3}{%
+    \def\tmp@points{[#3]}%
+  }{%
+    \def\tmp@points{}%
+  }%
+  \IfValueTF{#1}{%
+    #2~#1\tmp@points%
+  }{%
+    #2\tmp@points%
+  }%
+}
+
+\NewDocumentCommand{\gurps@char@attacks}{}{%
+  \luadirect{attacklist(_GCHARACTERKEY)}
+}
+
+\NewDocumentCommand{\gurps@char@TraitListMaker}{mmO{nil}}{
+  \NewDocumentCommand{#1}{}{%
+    \makeatletter%
+    \luadirect{traitlistmaker(#2, _GCHARACTERKEY, #3)}%
+    \makeatother%
+  }%
+}
+\NewDocumentCommand{\gurps@char@totalpoints}{O{_}}{%
+  \luadirect{tex.sprint(sum_points(\luastring{\unexpanded{#1}}))}~pt%
+}
+\gurps@char@TraitListMaker{\gurps@char@traits}{is_trait}
+\gurps@char@TraitListMaker{\gurps@char@advantages}{is_advantage}
+\gurps@char@TraitListMaker{\gurps@char@disadvantages}{is_disadvantage}
+\gurps@char@TraitListMaker{\gurps@char@skills}{is_skill}
+\gurps@char@TraitListMaker{\gurps@char@spells}{is_spell}
+\gurps@char@TraitListMaker{\gurps@char@basicattributes}{is_basic_attribute}[basic_attributes_sorter]
+\gurps@char@TraitListMaker{\gurps@char@secondarycharacteristics}{is_secondary_characteristic}[secondary_characteristics_sorter]
+\gurps@char@TraitListMaker{\gurps@char@properties}{is_property}
+\NewDocumentCommand{\gurps@char@checkandfixattrsandpoints}{}{%
+  \luadirect{check_and_fix_attrs_and_points(_GCHARACTERKEY)}%
+}
+%% 
+%% Copyright (C) 2017-2018 by Nathanael Farley <nasfarley88@gmail.com>
+%% 
+%% This work may be distributed and/or modified under the
+%% conditions of the LaTeX Project Public License (LPPL), either
+%% version 1.3c of this license or (at your option) any later
+%% version.  The latest version of this license is in the file:
+%% 
+%% http://www.latex-project.org/lppl.txt
+%% 
+%% This work is "maintained" (as per LPPL maintenance status) by
+%% Nathanael Farley.
+%% 
+%% This work consists of the file gurps.dtx and a Makefile.
+%% Running "make" generates the derived files README, gurps.pdf and gurps.sty.
+%% Running "make inst" installs the files in the user's TeX tree.
+%% Running "make install" installs the files in the local TeX tree.
+%% 
+%%
+%% End of file `gurps.sty'.

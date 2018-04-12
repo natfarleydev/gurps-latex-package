@@ -517,19 +517,16 @@ Running "make install" installs the files in the local TeX tree.
   % If the name has the tag :nolatex:, don't add it! Otherwise, add it.
   \luadirect{
     if not string.find(\luastring{\gurps@char@insertattr@name}, \luastring{:nolatex:}) then
-      function zero_if_arg_is_nil(arg)
-        if arg then
-          return arg
-        else
-          return 0
-        end
+      % If arg is blank (e.g. identity()), then this returns nil.
+      function identity(x)
+        return x
       end
 
       x = {
         name=\gurps@char@insertattr@name,
         type=\gurps@char@insertattr@type,
         points=\gurps@char@insertattr@points,
-        level=zero_if_arg_is_nil(\gurps@char@insertattr@level),
+        level=identity(\gurps@char@insertattr@level),
         basedon=\gurps@char@insertattr@basedon,
         difficulty=\gurps@char@insertattr@difficulty,
         diceexpr=\gurps@char@insertattr@diceexpr
