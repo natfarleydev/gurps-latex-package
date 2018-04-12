@@ -472,7 +472,8 @@ Running "make install" installs the files in the local TeX tree.
 % convert the values directly into the right Lua types.
 %    \begin{macrocode}
 \define@key{gurps@char@insertattr}{name}{%
-  \def\gurps@char@insertattr@name{\luastring{\unexpanded{#1}}}}
+  \def\gurps@char@insertattr@name{\unexpanded{[[#1]]}}} %TODO check this << has
+                                %fixed it
 \define@key{gurps@char@insertattr}{type}{%
   \def\gurps@char@insertattr@type{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattr}{level}{%
@@ -513,15 +514,22 @@ Running "make install" installs the files in the local TeX tree.
 
   \setkeys{gurps@char@insertattr}{#1}
 
-  \expandarg \IfSubStr{\gurps@char@insertattr@name}{:nolatex:}{
-    % If tagged with :nolatex:, just stop this macro right here!
-  }{%
-    % Otherwise, continue
-    \luadirect{x = {
+  % If the name has the tag :nolatex:, don't add it! Otherwise, add it.
+  \luadirect{
+    if not string.find(\luastring{\gurps@char@insertattr@name}, \luastring{:nolatex:}) then
+      function zero_if_arg_is_nil(arg)
+        if arg then
+          return arg
+        else
+          return 0
+        end
+      end
+
+      x = {
         name=\gurps@char@insertattr@name,
         type=\gurps@char@insertattr@type,
         points=\gurps@char@insertattr@points,
-        level=\gurps@char@insertattr@level,
+        level=zero_if_arg_is_nil(\gurps@char@insertattr@level),
         basedon=\gurps@char@insertattr@basedon,
         difficulty=\gurps@char@insertattr@difficulty,
         diceexpr=\gurps@char@insertattr@diceexpr
@@ -545,9 +553,8 @@ Running "make install" installs the files in the local TeX tree.
         )
         end
       insert_attr(_GCHARACTERKEY, x)
-    }%
+    end
   }%
-  \normalexpandarg
 }
 %    \end{macrocode}
 % \end{macro}
@@ -927,7 +934,7 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\gurps@char@print@attack}
 %    \begin{macrocode}
 \NewDocumentCommand{\gurps@char@print@attack}{mmmO{RangeOrReach}mm}{%
-  \textbf{\emph{#1 \fbox{#2} #3}} #6 \textit{#4: #5} %
+  \textbf{\textit{#1 \fbox{#2} #3}} #6 \textit{#4: #5}%
 }
 %    \end{macrocode}
 % \end{macro}
@@ -1115,12 +1122,14 @@ Running "make install" installs the files in the local TeX tree.
 \NewDocumentEnvironment{attacklist}{}
 {%
   \noindent%
-  \begin{itemize*}[%
-    itemjoin={\\},%
-    label={~--~},%
-    afterlabel={},%
+  \begin{itemize}[%
+    % itemjoin={\\},% TODO figure out why this causes a problem!
+    label={--},%
+    wide,
+    nosep
+    % afterlabel={},% Default of ~ is good
     ]%
-  }{\end{itemize*}}
+  }{\end{itemize}}
 %    \end{macrocode}
 % \end{environment}
 %

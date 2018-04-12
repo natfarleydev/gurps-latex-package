@@ -66,8 +66,12 @@ This character purposefully has no skills, advantages or disadvantages to check
 that they are not printed if needed. Also, this tests defining the points as an
 integer.
 
+This test also tests the \texttt{:nolatex:} tag to make sure that
+traits/skills/etc. with \texttt{:nolatex:} in the name are not added to the character.
+
 \begin{character}
   \spell{Foo bar?}[59]{40}
+  \advantage{This advantage should not be added to the character! :nolatex:}
 \end{character}
 
 \subsection{Then the character is printed again \ldots{}}
