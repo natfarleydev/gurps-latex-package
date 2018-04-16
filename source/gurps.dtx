@@ -190,6 +190,7 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{character}
 %   \ST{9}
 %   \HP{12}
+%   \GCAddToLevel{HP}{4}
 %   \advantage{Natural afro}[1]
 %   \disadvantage{Big teeth}[-1]
 %   \skill{Nunchuck}[DX/Easy]{16}
@@ -206,8 +207,9 @@ Running "make install" installs the files in the local TeX tree.
 % creates \ldots{}
 %
 % \begin{character}
-%   \HP{12}
 %   \ST{9}
+%   \HP{12}
+%   \GCAddToLevel{HP}{4}
 %   \advantage{Natural afro}[1]
 %   \advantage{\TeX-nical afro}[1]
 %   \disadvantage{Big teeth}[-1]
@@ -220,6 +222,11 @@ Running "make install" installs the files in the local TeX tree.
 %     notes={Believe it!}
 %   }
 % \end{character}
+%
+% (Also, \cs{GCGet}\oarg{character key}\marg{name}\oarg{macro name}, allows the
+% user to get individual values in a fully expandable macro (\cs{GCResult}) or
+% raise an error. E.g. the ST of the character is \GCGet{ST}\GCResult and a
+% dodge of \GCGet{Dodge}\GCResult)
 %
 %
 % \subsection{Typographical features}
@@ -398,6 +405,42 @@ Running "make install" installs the files in the local TeX tree.
   permissions granted in the
   \href{http://www.sjgames.com/general/online_policy.html}%
         {\SJGames Online Policy}.
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%\subsection{Accessing character stuffs}
+%\label{sec:acc-char-stuff}
+%
+% Often when doing more advanced things with characters, it's useful to have a
+% way to access the values and levels from lua using only \LaTeX. These macros
+% are for that
+%
+% \begin{macro}{\GCGet}
+%    \begin{macrocode}
+\NewDocumentCommand{\GCGet}{mO{\GCResult}}{%
+  \luadirect{tex_get_value_or_level(
+    _GCHARACTERKEY,
+    \luastring{\unexpanded{#1}},
+    \luastring{\unexpanded{#2}}
+    )
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\GCAddToLevel}
+% Sometimes it's useful to add values to existing attributes (specifically for
+% Pyramid \#3/72). Note: the attributes \emph{must} be defined before they are
+% added to the level. It goes like \cs{GCAddToLevel}\marg{name of
+% attr.}\marg{amount to add}
+%    \begin{macrocode}
+\NewDocumentCommand{\GCAddToLevel}{mm}{%
+  \luadirect{tex_add_to_level(
+    \luastring{\unexpanded{#1}}, % Thing to get
+    #2                           % How much to add to it
+    )
+  }%
 }
 %    \end{macrocode}
 % \end{macro}

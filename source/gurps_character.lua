@@ -118,10 +118,18 @@ function tbl_to_filter_pred(tbl)
   end
 end
 
+-- Filter an array. If predicate is a string, filter against the name, if its a
+-- table, convert with tbl_to_filter_pred, otherwise assume it's already a
+-- function!
 function filter(predicate, array)
+  if type(predicate) == "string" then
+    predicate = {name=predicate}
+  end
+
   if type(predicate) == "table" then
     predicate = tbl_to_filter_pred(predicate)
   end
+
   ret_array = {}
 
   if not array then
@@ -139,6 +147,23 @@ function filter(predicate, array)
   -- if at_least_one_match has been defined
   if at_least_one_match then
     return ret_array
+  else
+    return nil
+  end
+end
+
+-- Filter the character
+function cfilter(predicate, character_key)
+  character_key = character_key or _GCHARACTERKEY
+  c = get_character(character_key)
+  return filter(predicate, c)
+end
+
+-- Get a value from the character.
+function cget(predicate, character_key)
+  filter_results = cfilter(predicate, character_key)
+  if filter_results then
+    return filter_results[1]
   else
     return nil
   end
@@ -285,7 +310,7 @@ end
 function traitlistmaker(predicate, character_key, sortby)
   s = [[\begin{charactertraitlist}]]
 
-  array = filter(predicate, get_character(character_key))
+  array = cfilter(predicate, character_key)
   if array then
     if sortby then
       table.sort(array, sortby)
@@ -302,7 +327,7 @@ function traitlistmaker(predicate, character_key, sortby)
 end
 
 function attacklist(character_key)
-  attacks = filter(is_attack, get_character(character_key))
+  attacks = cfilter(is_attack, character_key)
   if attacks then
     s = [[\makeatletter\begin{attacklist}]]
     for _,attack in ipairs(attacks) do
@@ -326,7 +351,7 @@ end
 
 function check_and_fix_attrs(character_key)
   function get(name)
-    arr = filter({name=name}, get_character(character_key))
+    arr = cfilter({name=name}, character_key)
     if arr then
       return arr[1]
     else
@@ -392,8 +417,8 @@ function check_and_fix_attrs(character_key)
 end
 
 function check_and_fix_points(character_key)
-  function get(name)
-    arr = filter({name=name}, get_character(character_key))
+  local get = function(name)
+    arr = cfilter({name=name}, character_key)
     if arr then
       return arr[1]
     else
@@ -521,4 +546,31 @@ function check_and_fix_toggles(character_key)
       tex.sprint([[\togglefalse{has]] .. v .. [[s}]])
     end
   end
+end
+
+-- the function for \GCGet
+function tex_get_value_or_level(character_key, name, macro)
+  tbl = cget(name, character_key)
+  if tbl then
+    if tbl.level or tbl.value then
+      tex.sprint([[\edef]] .. macro .. "{" .. (tbl.value or tbl.level) .. "}")
+    else
+      tex.error([[Got name ']] .. name [[' but it doesn't have a value or level!]])
+    end
+  else
+    tex.error([[Unable to get ']] .. name .. "'")
+  end
+end
+
+function tex_add_to_level(name, amount_to_add, character_key)
+  character_key = character_key or _GCHARACTERKEY
+  attr = cget(name, character_key)
+  if not attr then
+    tex.error("Unable to find attribute with name '"
+                .. name .. [[' in macro \GCAddToLevel.]])
+  end
+  if not attr.level then
+    tex.error("Attribute '" .. name .. "' found but has no level!")
+  end
+  attr.level = attr.level + amount_to_add
 end
