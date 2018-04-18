@@ -484,6 +484,10 @@ Running "make install" installs the files in the local TeX tree.
   \IfBooleanTF{#1}{}{\printcharacter}%
   \ResetCharacterKey%
 }
+\ExplSyntaxOn
+\cs_new:cpn {character*} {\character*}
+\cs_new_eq:cN {endcharacter*} \endcharacter
+\ExplSyntaxOff
 %    \end{macrocode}
 % \end{environment}
 %
@@ -538,11 +542,17 @@ Running "make install" installs the files in the local TeX tree.
 % the character.
 %    \begin{macrocode}
 \NewDocumentCommand{\gurps@char@insertattr}{m}{
+  % If not in character or character* environment, raise a PackageError
   \def\@myenvname{character}
   \ifx\@currenvir\@myenvname
-  % pass
+    % pass
   \else
-  \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
+    \def\@myenvname{character*}
+    \ifx\@currenvir\@myenvname
+      % pass
+    \else
+      \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
+    \fi
   \fi
 
   \setkeys{gurps@char@insertattr}{
@@ -895,6 +905,7 @@ Running "make install" installs the files in the local TeX tree.
 \define@key{gurps@char@insertattack}{damage}{
   \def\gurps@char@insertattack@damage{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattack}{level}{\def\gurps@char@insertattack@level{#1}}
+\define@key{gurps@char@insertattack}{acc}{\def\gurps@char@insertattack@acc{#1}}
 \define@key{gurps@char@insertattack}{reach}{
   \def\gurps@char@insertattack@reach{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattack}{range}{
@@ -908,16 +919,23 @@ Running "make install" installs the files in the local TeX tree.
   type=NotSet,
   damage=0d,
   level=nil,
+  acc=nil,
   reach=NotSet,
   range=NotSet,
   notes={},
 }
 \NewDocumentCommand{\gurps@char@insertattack}{sm}{
+  % If not in character or character* environment, raise a PackageError
   \def\@myenvname{character}
   \ifx\@currenvir\@myenvname
-  % pass
+    % pass
   \else
-  \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
+    \def\@myenvname{character*}
+    \ifx\@currenvir\@myenvname
+      % pass
+    \else
+      \PackageError{gurps}{Not in character environment! Currently in \@currenvir{} environment.}{}
+    \fi
   \fi
 
   \IfBooleanTF{#1}{}{
@@ -926,6 +944,7 @@ Running "make install" installs the files in the local TeX tree.
       type=NotSet,
       damage=0d,
       level=nil,
+      acc=nil,
       reach=NotSet,
       range=NotSet,
       notes={},
