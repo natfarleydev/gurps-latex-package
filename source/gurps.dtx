@@ -207,6 +207,7 @@ Running "make install" installs the files in the local TeX tree.
 % creates \ldots{}
 %
 % \begin{character}
+%   \name{Mr.~Awesome}
 %   \ST{9}
 %   \HP{12}
 %   \GCAddToLevel{HP}{4}
@@ -226,7 +227,7 @@ Running "make install" installs the files in the local TeX tree.
 % (Also, \cs{GCGet}\oarg{character key}\marg{name}\oarg{macro name}, allows the
 % user to get individual values in a fully expandable macro (\cs{GCResult}) or
 % raise an error. E.g. the ST of the character is \GCGet{ST}\GCResult and a
-% dodge of \GCGet{Dodge}\GCResult)
+% dodge of \GCGet{Dodge}\GCResult). Also, the name of the character is \GCGet{Name}\GCResult.
 %
 %
 % \subsection{Typographical features}
@@ -559,6 +560,8 @@ Running "make install" installs the files in the local TeX tree.
                                 %fixed it
 \define@key{gurps@char@insertattr}{type}{%
   \def\gurps@char@insertattr@type{\luastring{\unexpanded{#1}}}}
+\define@key{gurps@char@insertattr}{value}{%
+  \def\gurps@char@insertattr@value{\luastring{\unexpanded{#1}}}}
 \define@key{gurps@char@insertattr}{level}{%
   \def\gurps@char@insertattr@level{#1}}
 \define@key{gurps@char@insertattr}{diceexpr}{%
@@ -596,6 +599,7 @@ Running "make install" installs the files in the local TeX tree.
     type=NotSet,
     points=nil,
     level=nil,
+    value=NotSet,
     basedon=DX,
     difficulty=NotSet,
     diceexpr=NotSet,
@@ -616,6 +620,7 @@ Running "make install" installs the files in the local TeX tree.
         type=\gurps@char@insertattr@type,
         points=\gurps@char@insertattr@points,
         level=identity(\gurps@char@insertattr@level),
+        value=\gurps@char@insertattr@value,
         basedon=\gurps@char@insertattr@basedon,
         difficulty=\gurps@char@insertattr@difficulty,
         diceexpr=\gurps@char@insertattr@diceexpr
@@ -717,6 +722,25 @@ Running "make install" installs the files in the local TeX tree.
     else
       tex.sprint([[\PackageError{gurps}{Stat '#1' not found!}]])
     end
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+%
+%
+%\subsubsection{Metadata}
+%\label{sec:char-metadata}
+%
+% This section contains commands for metadata for the character e.g. data that
+% does not change calculations but that is useful like \cs{name}\marg{name}.
+%
+% \begin{macro}{\name}
+%    \begin{macrocode}
+\NewDocumentCommand{\name}{m}{%
+  \gurps@char@insertattr{%
+    name=Name,
+    value=#1,
+    type=metadata
   }%
 }
 %    \end{macrocode}
@@ -1241,9 +1265,9 @@ Running "make install" installs the files in the local TeX tree.
     \def\tmp@points{}%
   }%
   \IfValueTF{#1}{%
-    #2~#1\tmp@points%
+    #2~#1~\tmp@points%
   }{%
-    #2\tmp@points%
+    #2~\tmp@points%
   }%
 }
 %    \end{macrocode}

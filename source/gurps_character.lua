@@ -95,6 +95,7 @@ enums.type = _identity_pairs_tbl({"advantage" ,
                                  "secondary_characteristic" ,
                                  "melee_attack",
                                  "ranged_attack",
+                                 "metadata",
                                  "property"})
 enums.difficulty = {
   easy="Easy",
@@ -552,8 +553,10 @@ end
 function tex_get_value_or_level(character_key, name, macro)
   tbl = cget(name, character_key)
   if tbl then
-    if tbl.level or tbl.value then
-      tex.sprint([[\edef]] .. macro .. "{" .. (tbl.value or tbl.level) .. "}")
+    if tbl.level then
+      tex.sprint([[\edef]] .. macro .. "{" .. tbl.level .. "}")
+    elseif tbl.value and tbl.value ~= "NotSet"  then
+      tex.sprint([[\edef]] .. macro .. "{" .. tbl.value .. "}")
     else
       tex.error([[Got name ']] .. name [[' but it doesn't have a value or level!]])
     end
