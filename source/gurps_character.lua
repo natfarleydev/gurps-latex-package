@@ -574,3 +574,13 @@ function tex_add_to_level(name, amount_to_add, character_key)
   end
   attr.level = attr.level + amount_to_add
 end
+
+
+function tex_getcharacterfromfile(basenamepath, character_key)
+  local exec_string = [[gcs ]] .. basenamepath
+    .. [[.gcs -text -text_template=$(kpsewhich gurps-gcs-template.gcx)]]
+  local retval = os.execute(exec_string)
+  if not retval then
+    tex.error([[Uh oh. Trying to run  ']] .. exec_string .. "' returned " .. tostring(retval))
+  end
+end

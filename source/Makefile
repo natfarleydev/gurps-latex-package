@@ -21,6 +21,7 @@ inst: all
 	mkdir -p $(UTREE)/{tex,source,doc}/latex/$(NAME)
 	cp $(NAME).dtx $(UTREE)/source/latex/$(NAME)
 	cp $(NAME).sty $(UTREE)/tex/latex/$(NAME)
+	cp gurps-gcs-template.gcx $(UTREE)/tex/latex/gurps-gcs-template.gcx
 	cp $(NAME).lua $(UTREE)/tex/latex/$(NAME)
 	cp gurps_tables.lua $(UTREE)/tex/latex/$(TABLE_NAME)
 	cp gurps_character.lua $(UTREE)/tex/latex/$(TABLE_NAME)
@@ -29,6 +30,7 @@ install: all
 	sudo mkdir -p $(LOCAL)/{tex,source,doc}/latex/$(NAME)
 	sudo cp $(NAME).dtx $(LOCAL)/source/latex/$(NAME)
 	sudo cp $(NAME).sty $(LOCAL)/tex/latex/$(NAME)
+	cp gurps-gcs-template.tex $(UTREE)/tex/latex/gurps-gcs-template.tex
 	sudo cp $(NAME).lua $(UTREE)/tex/latex/$(NAME)
 	sudo cp gurps_tables.lua $(UTREE)/tex/latex/$(NAME)
 	sudo cp gurps_character.lua $(UTREE)/tex/latex/$(NAME)

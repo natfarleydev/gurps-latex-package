@@ -307,6 +307,7 @@ Running "make install" installs the files in the local TeX tree.
 \RequirePackage{xparse}
 \RequirePackage{xspace}
 \RequirePackage{luacode}
+\RequirePackage{shellesc}
 \RequirePackage{tikz}
 \RequirePackage{calc}
 \PassOptionsToPackage{inline}{enumitem}
@@ -490,6 +491,41 @@ Running "make install" installs the files in the local TeX tree.
 \ExplSyntaxOff
 %    \end{macrocode}
 % \end{environment}
+%
+% \begin{macro}{\getcharacterfromgcx}
+% Because generating a character on the fly with \cs{getcharacterfromfile} can
+% take a \emph{long} time, this macro gives the option to use a pregenerated gcx file
+%    \begin{macrocode}
+\NewDocumentCommand{\getcharacterfromgcx}{smm}{%
+  \IfBooleanTF{#1}{%
+    % Starred
+    \begin{character*}[#3]%
+      \input{#2.gcx}
+    \end{character*}%
+  }{%
+    % Unstarred
+    \begin{character}[#3]%
+      \input{#2.gcx}
+    \end{character}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% 
+% \begin{macro}{\getcharacterfromfile}
+%    \begin{macrocode}
+\NewDocumentCommand{\getcharacterfromfile}{mm}{%
+  % TODO set this up so it does not clutter the folder of the character sheets
+  % by default
+  \luadirect{tex_getcharacterfromfile(
+    \luastring{\unexpanded{#1}},
+    \luastring{\unexpanded{#2}}
+    )}%
+  \getcharacterfromgcx{#1}{#2}
+}
+%    \end{macrocode}
+% \end{macro}
+%
 %
 % \begin{macro}{\SetCharacterKey}
 % Sets the key for the current character. This sets the lua string |_GCHARACTER|
