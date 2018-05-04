@@ -88,15 +88,17 @@ end
 -- Enums for things with allowed values
 enums = {}
 enums.type = _identity_pairs_tbl({"advantage" ,
-                                 "disadvantage" ,
-                                 "skill" ,
-                                 "spell" ,
-                                 "basic_attribute" ,
-                                 "secondary_characteristic" ,
-                                 "melee_attack",
-                                 "ranged_attack",
-                                 "metadata",
-                                 "property"})
+                                  "disadvantage" ,
+                                  "quirk",
+                                  "perk",
+                                  "skill" ,
+                                  "spell" ,
+                                  "basic_attribute" ,
+                                  "secondary_characteristic" ,
+                                  "melee_attack",
+                                  "ranged_attack",
+                                  "metadata",
+                                  "property"})
 enums.difficulty = {
   easy="Easy",
   average="Average",
@@ -187,13 +189,29 @@ function is_advantage(attr)
   return attr.type == "advantage"
 end
 
+function is_perk(attr)
+  return attr.type == "perk"
+end
+
+function is_quirk(attr)
+  return attr.type == "quirk"
+end
+
 function is_disadvantage(attr)
   return attr.type == "disadvantage"
 end
 
 -- A trait is an advantage or a disadvantage
 function is_trait(attr)
+  return is_advantage(attr) or is_disadvantage(attr) or is_quirk(attr) or is_perk(attr)
+end
+
+function is_advantageordisadvantage(attr)
   return is_advantage(attr) or is_disadvantage(attr)
+end
+
+function is_perkorquirk(attr)
+  return is_perk(attr) or is_quirk(attr)
 end
 
 function is_skill(attr)
@@ -532,7 +550,9 @@ function check_and_fix_toggles(character_key)
   c = get_character(character_key)
   things = {
     "advantage",
+    "perk",
     "disadvantage",
+    "quirk",
     "trait",
     "skill",
     "spell",
@@ -550,6 +570,7 @@ function check_and_fix_toggles(character_key)
 end
 
 -- the function for \GCGet
+-- TODO rename this function! It gets dice expressions too!
 function tex_get_value_or_level(character_key, name, macro)
   tbl = cget(name, character_key)
   if tbl then
@@ -557,8 +578,10 @@ function tex_get_value_or_level(character_key, name, macro)
       tex.sprint([[\edef]] .. macro .. "{" .. tbl.level .. "}")
     elseif tbl.value and tbl.value ~= "NotSet"  then
       tex.sprint([[\edef]] .. macro .. "{" .. tbl.value .. "}")
+    elseif tbl.diceexpr and tbl.diceexpr ~= "NotSet" then
+      tex.sprint([[\edef]] .. macro .. "{" .. tbl.diceexpr .. "}")
     else
-      tex.error([[Got name ']] .. name [[' but it doesn't have a value or level!]])
+      tex.error([[Got name ']] .. name .. [[' but it doesn't have a value or level!]])
     end
   else
     tex.error([[Unable to get ']] .. name .. "'")

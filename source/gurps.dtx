@@ -192,8 +192,8 @@ Running "make install" installs the files in the local TeX tree.
 %   \HP{12}
 %   \GCAddToLevel{HP}{4}
 %   \advantage{Natural afro}[1]
-%   \disadvantage{Big teeth}[-1]
 %   \skill{Nunchuck}[DX/Easy]{16}
+%   \quirk{Big teeth}
 %   \meleeattack{
 %     name=Punch,
 %     level=18,
@@ -213,7 +213,7 @@ Running "make install" installs the files in the local TeX tree.
 %   \GCAddToLevel{HP}{4}
 %   \advantage{Natural afro}[1]
 %   \advantage{\TeX-nical afro}[1]
-%   \disadvantage{Big teeth}[-1]
+%   \quirk{Big teeth}
 %   \skill{Nunchuck}[DX/Easy]{16}
 %   \meleeattack{
 %     name={Punch},
@@ -483,7 +483,7 @@ Running "make install" installs the files in the local TeX tree.
   \luadirect{new_character(_GCHARACTERKEY)}%
 }{%
   \gurps@char@checkandfixattrsandpoints%
-  \IfBooleanTF{#1}{}{\printcharacter}%
+  \IfBooleanTF{#1}{}{\GCPrintCharacter}%
   \ResetCharacterKey%
 }
 \ExplSyntaxOn
@@ -661,7 +661,9 @@ Running "make install" installs the files in the local TeX tree.
 % 
 %    \begin{macrocode}
 \newtoggle{hasadvantages}
+\newtoggle{hasperks}
 \newtoggle{hasdisadvantages}
+\newtoggle{hasquirks}
 \newtoggle{hastraits}
 \newtoggle{hasskills}
 \newtoggle{hasspells}
@@ -678,10 +680,10 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 %\subsection{Printing the character}
 %
-% \begin{macro}{\printcharacter}
+% \begin{macro}{\GCPrintCharacter}
 % (This function is mostly for debug at the moment)
 %    \begin{macrocode}
-\NewDocumentCommand{\printcharacter}{o}{%
+\NewDocumentCommand{\GCPrintCharacter}{o}{%
   \IfValueTF{#1}{\SetCharacterKey{#1}}{}%
   \gurps@char@checkandfixtoggles%
   \charactersection*{Basic Attributes}%
@@ -694,9 +696,17 @@ Running "make install" installs the files in the local TeX tree.
     \charactersection*{Advantages}%
     \gurps@char@advantages%
   }{}%
+  \iftoggle{hasperks}{%
+    \charactersection*{Perks}%
+    \gurps@char@perks%
+  }{}%
   \iftoggle{hasdisadvantages}{%
     \charactersection*{Disadvantages}%
     \gurps@char@disadvantages%
+  }{}%
+  \iftoggle{hasquirks}{%
+    \charactersection*{Quirks}%
+    \gurps@char@quirks%
   }{}%
   \iftoggle{hasskills}{%
     \charactersection*{Skills}%
@@ -985,7 +995,7 @@ Running "make install" installs the files in the local TeX tree.
   acc=nil,
   reach=NotSet,
   range=NotSet,
-  notes={},
+  notes=,
 }
 \NewDocumentCommand{\gurps@char@insertattack}{sm}{
   % If not in character or character* environment, raise a PackageError
@@ -1082,6 +1092,18 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\perk}
+% Adds an perk to a character. NOTE: this only works in a |character|.
+%    \begin{macrocode}
+\NewDocumentCommand{\perk}{m}{%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=perk,%
+    points=1%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\disadvantage}
 % Adds a disadvantage to a character. NOTE: this only works in a |character| or
 % |lens| environment.
@@ -1091,6 +1113,19 @@ Running "make install" installs the files in the local TeX tree.
     name={#1},%
     type=disadvantage,%
     points=#2%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\quirk}
+% Adds a quirk to a character. NOTE: this only works in a |character| or
+% |lens| environment.
+%    \begin{macrocode}
+\NewDocumentCommand{\quirk}{m}{%
+  \gurps@char@insertattr{%
+    name={#1},%
+    type=quirk,%
+    points=-1
   }%
 }
 %    \end{macrocode}
@@ -1312,9 +1347,29 @@ Running "make install" installs the files in the local TeX tree.
 \gurps@char@TraitListMaker{\gurps@char@advantages}{is_advantage}
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\gurps@char@advantagesanddisadvantages}
+%    \begin{macrocode}
+\gurps@char@TraitListMaker{\gurps@char@advantagesanddisadvantages}{is_advantageordisadvantage}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@perks}
+%    \begin{macrocode}
+\gurps@char@TraitListMaker{\gurps@char@perks}{is_perk}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\gurps@char@disadvantages}
 %    \begin{macrocode}
 \gurps@char@TraitListMaker{\gurps@char@disadvantages}{is_disadvantage}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@quirks}
+%    \begin{macrocode}
+\gurps@char@TraitListMaker{\gurps@char@quirks}{is_quirk}
+%    \end{macrocode}
+% \end{macro}
+% \begin{macro}{\gurps@char@perksandquirks}
+%    \begin{macrocode}
+\gurps@char@TraitListMaker{\gurps@char@perksandquirks}{is_perkorquirk}
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\gurps@char@skills}
