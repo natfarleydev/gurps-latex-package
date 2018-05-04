@@ -495,7 +495,10 @@ Running "make install" installs the files in the local TeX tree.
 %
 % \begin{macro}{\getcharacterfromgcx}
 % Because generating a character on the fly with \cs{getcharacterfromfile} can
-% take a \emph{long} time, this macro gives the option to use a pregenerated gcx file
+% take a \emph{long} time, this macro gives the option to use a pregenerated gcx
+% file. To generate a gcx file, use the command:
+%
+% |$ gcs character.gcs -text -text_template=$(kpsewhich gurps-gcs-template.gcx)|
 %    \begin{macrocode}
 \NewDocumentCommand{\getcharacterfromgcx}{smm}{%
   \IfBooleanTF{#1}{%
