@@ -942,6 +942,19 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
+% \begin{macro}{\characterpicture}
+% Sets the sw of the current character
+%    \begin{macrocode}
+\NewDocumentCommand{\characterpicture}{m}{
+  \gurps@char@insertattr{
+    name={Character picture},
+    type=property,
+    value={#1}
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
+
 % \begin{macro}{\basicspeed}
 % Sets the Basic Speed of the current character
 %    \begin{macrocode}
