@@ -943,14 +943,16 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 
 % \begin{macro}{\characterpicture}
-% Sets the sw of the current character
+% Sets the picture of the current character. NOTE: this will silently not add a
+% picture if the file does not exist! This macro is primarly designed to be used
+% with the gcs latex template.
 %    \begin{macrocode}
 \NewDocumentCommand{\characterpicture}{m}{
-  \gurps@char@insertattr{
-    name={Character picture},
-    type=property,
-    value={#1}
-  }%
+    \gurps@char@insertattr{
+      name={Character picture},
+      type=property,
+      value={#1}
+    }%
 }
 %    \end{macrocode}
 % \end{macro}

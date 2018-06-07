@@ -4,6 +4,12 @@ jobs:
     docker:
       - image: aergus/latex
     steps:
+      - run:
+          name: Checkout GCS
+          command: wget https://github.com/richardwilkes/gcs/releases/download/gcs-4.10.0/gcs-4.10.0-linux.zip && unzip *.zip -d /tmp/gcs
+      - run:
+          name: Add GCS to path!
+          command: ln -s /tmp/gcs/gcs-4.10.0-linux/gcs /usr/bin/gcs
       - checkout
       - run:
           name: Make!
