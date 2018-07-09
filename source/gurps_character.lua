@@ -610,3 +610,66 @@ function tex_getcharacterfromfile(basenamepath, character_key)
     tex.error([[Uh oh. Trying to run  ']] .. exec_string .. "' returned " .. tostring(retval))
   end
 end
+
+
+function create_list_predicate(tex_input)
+  available_predicates = {
+    advantage=is_advantage,
+    disadvantage=is_disadvantage,
+    trait=is_trait,
+    perk=is_perk,
+    quirk=is_quirk,
+    skill=is_skill,
+    spell=is_spell
+    -- no attack, it's not a 'real' trait
+  }
+
+  if not tex_input:gmatch("%w+") then
+    tex.error("No matches found! Were any arguments passed to create_list_predicate?\n\nHere they are: " .. tex_input)
+  end
+
+  local predicates = {}
+  for v,p in pairs(available_predicates) do
+    print("v: " .. v)
+    for match in tex_input:gmatch("%w+") do
+      print("match: " .. match)
+      if match:find("^" .. v .. "s$") then
+        print("Match found!")
+        table.insert(predicates, available_predicates[v])
+      else
+        print("Match not found :(")
+      end
+    end
+  end
+
+  -- Return the newly formed OR predicate
+  retfunc = function(x)
+    print("Entering anonymous function for predicating")
+    for _,predicate in ipairs(predicates) do
+      print("predicate: " .. tostring(predicate))
+      if predicate(x) then
+        return true
+      end
+    end
+
+    return false
+  end
+
+  return retfunc
+end
+
+-- You know what, I'm going to test this function right now
+function test_create_list_predicate()
+  print("Testing create_list_predicate")
+  local x = "advantages,disadvantages"
+  local f = create_list_predicate(x)
+
+  -- This should pass every time
+  print("Created create_list_predicate('" .. x .. "'): " .. tostring(f))
+  local attr = {type="advantage"}
+  if f(attr) == false then
+    tex.error("We have serious problems.")
+  end
+end
+
+test_create_list_predicate()

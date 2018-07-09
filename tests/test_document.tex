@@ -79,6 +79,15 @@ traits/skills/etc. with \texttt{:nolatex:} in the name are not added to the char
 
 \GCPrintCharacter[foo bar]
 
+\subsection{Now we print the character again, but only part of it}
+\label{sec:aasdfasdf}
+
+\makeatletter
+\SetCharacterKey{foo bar}
+\luadirect{traitlistmaker(create_list_predicate(\luastring{advantages,disadvantages}))}
+\ResetCharacterKey
+\makeatother
+
 
 \section{Various disclaimers}
 \label{sec:various-disclaimers}
