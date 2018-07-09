@@ -281,7 +281,7 @@ function if_else_packageerror(pred, message)
 end
 
 function attr_to_tex(attr)
-  s = [[\gurps@char@print@attr]]
+  s = [[\GCPrintAttr]]
   level_str = ""
   if attr.level or attr.diceexpr ~= "NotSet" then
     level_str = "[" .. (attr.level or attr.diceexpr) .. "]"

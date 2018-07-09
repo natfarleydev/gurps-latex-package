@@ -456,7 +456,7 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{tcolorbox}[title={Future plans!}]
 %   At the moment, there's a real mix of commands with and without |@| that
 %   should probably be switched to be internal/external so that the user can
-%   configure them (e.g. \cs{gurps@char@print@attr}). In the future, this will
+%   configure them (e.g. \cs{GCPrintAttr}). In the future, this will
 %   happen. For now \ldots{} feel free to edit them and see what happens! |:)|\\[1ex]
 %
 %   Also in the future, there will eventually be `theme' support such that the
@@ -1305,13 +1305,13 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{environment}
 %
-% \begin{macro}{\gurps@char@print@attr}
+% \begin{macro}{\GCPrintAttr}
 % It's like this:
-% \cs{gurps@char@print@attr}\oarg{level/diceexpr}\marg{name}\oarg{points}. This
+% \cs{GCPrintAttr}\oarg{level/diceexpr}\marg{name}\oarg{points}. This
 % macro is usually called by the lua function |attr_to_tex| (which returns a
 % string)
 %    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@print@attr}{omo}{%
+\NewDocumentCommand{\GCPrintAttr}{omo}{%
   \IfValueTF{#3}{%
     \def\tmp@points{[#3]}%
   }{%
