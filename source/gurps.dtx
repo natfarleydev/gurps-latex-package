@@ -681,27 +681,27 @@ Running "make install" installs the files in the local TeX tree.
   }%
   \GCIfListNotEmpty{perks}{
     \charactersection*{Perks}%
-    \GCPrintListOf{perks}
+    \GCPrintListOf{perks}%
   }%
   \GCIfListNotEmpty{disadvantages}{%
     \charactersection*{Disadvantages}%
-    \GCPrintListOf{disadvantages}
+    \GCPrintListOf{disadvantages}%
   }%
   \GCIfListNotEmpty{quirks}{%
     \charactersection*{Quirks}%
-    \GCPrintListOf{quirks}
+    \GCPrintListOf{quirks}%
   }%
   \GCIfListNotEmpty{skills}{%
     \charactersection*{Skills}%
-    \GCPrintListOf{skills}
+    \GCPrintListOf{skills}%
   }%
   \GCIfListNotEmpty{spells}{%
     \charactersection*{Spells}%
-    \GCPrintListOf{spells}
+    \GCPrintListOf{spells}%
   }%
   \GCIfListNotEmpty{attacks}{%
     \charactersection*{\strut Attacks}\ \linebreak%
-    \gurps@char@attacks%
+    \GCPrintListOfAttacks%
   }%
   \IfValueTF{#1}{\ResetCharacterKey}{}%
 }
@@ -1061,9 +1061,9 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\gurps@char@print@attack}
+% \begin{macro}{\GCPrintAttack}
 %    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@print@attack}{mmmO{RangeOrReach}mm}{%
+\NewDocumentCommand{\GCPrintAttack}{mmmO{RangeOrReach}mm}{%
   \textbf{\textit{#1 \fbox{#2} #3}} #6 \textit{#4: #5}%
 }
 %    \end{macrocode}
@@ -1309,9 +1309,9 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 
-% \begin{macro}{\gurps@char@attacks}
+% \begin{macro}{\GCPrintListOfAttacks}
 %    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@attacks}{}{%
+\NewDocumentCommand{\GCPrintListOfAttacks}{}{%
   \luadirect{attacklist(_GCHARACTERKEY)}
 }
 %    \end{macrocode}
