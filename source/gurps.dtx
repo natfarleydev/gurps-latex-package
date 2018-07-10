@@ -550,7 +550,7 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 %
 % 
-% \begin{macro}{\gurps@char@insertattr}
+% \begin{macro}{\GCInsertAttr}
 % Macro for inserting an attribute to the character. Anything inserted with
 % |:nolatex:| in the name is not added to the character. (This is to aid
 % importing directly from a |*.gcs| file.)
@@ -558,32 +558,32 @@ Running "make install" installs the files in the local TeX tree.
 % First, we define the |xkeval| keys for the function. These are set up to
 % convert the values directly into the right Lua types.
 %    \begin{macrocode}
-\define@key{gurps@char@insertattr}{name}{%
-  \def\gurps@char@insertattr@name{\unexpanded{[[#1]]}}} %TODO check this << has
+\define@key{GCInsertAttr}{name}{%
+  \def\GCInsertAttr@name{\unexpanded{[[#1]]}}} %TODO check this << has
                                 %fixed it
-\define@key{gurps@char@insertattr}{type}{%
-  \def\gurps@char@insertattr@type{\luastring{\unexpanded{#1}}}}
-\define@key{gurps@char@insertattr}{value}{%
-  \def\gurps@char@insertattr@value{\luastring{\unexpanded{#1}}}}
-\define@key{gurps@char@insertattr}{level}{%
-  \def\gurps@char@insertattr@level{#1}}
-\define@key{gurps@char@insertattr}{diceexpr}{%
-  \def\gurps@char@insertattr@diceexpr{\luastring{#1}}}
-\define@key{gurps@char@insertattr}{points}{%
-  \def\gurps@char@insertattr@points{#1}}
-\define@key{gurps@char@insertattr}{basedon}{%
-  \def\gurps@char@insertattr@basedon{\luastring{\unexpanded{#1}}}}
-\define@key{gurps@char@insertattr}{difficulty}{%
-  \def\gurps@char@insertattr@difficulty{\luastring{\unexpanded{#1}}}}
+\define@key{GCInsertAttr}{type}{%
+  \def\GCInsertAttr@type{\luastring{\unexpanded{#1}}}}
+\define@key{GCInsertAttr}{value}{%
+  \def\GCInsertAttr@value{\luastring{\unexpanded{#1}}}}
+\define@key{GCInsertAttr}{level}{%
+  \def\GCInsertAttr@level{#1}}
+\define@key{GCInsertAttr}{diceexpr}{%
+  \def\GCInsertAttr@diceexpr{\luastring{#1}}}
+\define@key{GCInsertAttr}{points}{%
+  \def\GCInsertAttr@points{#1}}
+\define@key{GCInsertAttr}{basedon}{%
+  \def\GCInsertAttr@basedon{\luastring{\unexpanded{#1}}}}
+\define@key{GCInsertAttr}{difficulty}{%
+  \def\GCInsertAttr@difficulty{\luastring{\unexpanded{#1}}}}
 %    \end{macrocode}
-% Then we define \cs{gurps@char@insertattr}\marg{key-value pairs}. The macro
+% Then we define \cs{GCInsertAttr}\marg{key-value pairs}. The macro
 % first checks we are in a |character| environment (throwing an error if we are
 % not), defines the keys, then does the Lua stuff.
 %
 % Side note: anything with |:nolatex:| in the name is discarded and not put into
 % the character.
 %    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@insertattr}{m}{
+\NewDocumentCommand{\GCInsertAttr}{m}{
   % If not in character or character* environment, raise a PackageError
   \def\@myenvname{character}
   \ifx\@currenvir\@myenvname
@@ -597,7 +597,7 @@ Running "make install" installs the files in the local TeX tree.
     \fi
   \fi
 
-  \setkeys{gurps@char@insertattr}{
+  \setkeys{GCInsertAttr}{
     name=NotSet,
     type=NotSet,
     points=nil,
@@ -608,25 +608,25 @@ Running "make install" installs the files in the local TeX tree.
     diceexpr=NotSet,
   }
 
-  \setkeys{gurps@char@insertattr}{#1}
+  \setkeys{GCInsertAttr}{#1}
 
   % If the name has the tag :nolatex:, don't add it! Otherwise, add it.
   \luadirect{
-    if not string.find(\luastring{\gurps@char@insertattr@name}, \luastring{:nolatex:}) then
+    if not string.find(\luastring{\GCInsertAttr@name}, \luastring{:nolatex:}) then
       % If arg is blank (e.g. identity()), then this returns nil.
       function identity(x)
         return x
       end
 
       x = {
-        name=\gurps@char@insertattr@name,
-        type=\gurps@char@insertattr@type,
-        points=\gurps@char@insertattr@points,
-        level=identity(\gurps@char@insertattr@level),
-        value=\gurps@char@insertattr@value,
-        basedon=\gurps@char@insertattr@basedon,
-        difficulty=\gurps@char@insertattr@difficulty,
-        diceexpr=\gurps@char@insertattr@diceexpr
+        name=\GCInsertAttr@name,
+        type=\GCInsertAttr@type,
+        points=\GCInsertAttr@points,
+        level=identity(\GCInsertAttr@level),
+        value=\GCInsertAttr@value,
+        basedon=\GCInsertAttr@basedon,
+        difficulty=\GCInsertAttr@difficulty,
+        diceexpr=\GCInsertAttr@diceexpr
       }
 
       if_else_packageerror(
@@ -654,72 +654,55 @@ Running "make install" installs the files in the local TeX tree.
 % \end{macro}
 %
 %
-%\subsection{A few toggles}
-%\label{sec:toggles}
+%\subsection{Printing the character}
 %
-% These should be set by lua stuff.
-% 
+% \begin{macro}{\GCIfListNotEmpty}
 %    \begin{macrocode}
-\newtoggle{hasadvantages}
-\newtoggle{hasperks}
-\newtoggle{hasdisadvantages}
-\newtoggle{hasquirks}
-\newtoggle{hastraits}
-\newtoggle{hasskills}
-\newtoggle{hasspells}
-\newtoggle{hasattacks}
-%    \end{macrocode}
-%
-% \begin{macro}{\gurps@char@checkandfixtoggles}
-% This command fixes all the toggles used in printing the character.
-%    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@checkandfixtoggles}{}{%
-\luadirect{check_and_fix_toggles(_GCHARACTERKEY)}%
+\NewDocumentCommand{\GCIfListNotEmpty}{mm}{%
+  \luadirect{tex_if_list_not_empty(\luastring{\unexpanded{#1}},
+                                   \luastring{\unexpanded{#2}})}
 }
 %    \end{macrocode}
 % \end{macro}
-%\subsection{Printing the character}
-%
 % \begin{macro}{\GCPrintCharacter}
 % (This function is mostly for debug at the moment)
 %    \begin{macrocode}
 \NewDocumentCommand{\GCPrintCharacter}{o}{%
   \IfValueTF{#1}{\SetCharacterKey{#1}}{}%
-  \gurps@char@checkandfixtoggles%
   \charactersection*{Basic Attributes}%
   \gurps@char@basicattributes%
   \charactersection*{Secondary Characteristics}%
   \gurps@char@secondarycharacteristics%
   \charactersection*{Other}%
   \gurps@char@properties%
-  \iftoggle{hasadvantages}{%
+  \GCIfListNotEmpty{advantages}{%
     \charactersection*{Advantages}%
     \GCPrintListOf{advantages}%
-  }{}%
-  \iftoggle{hasperks}{%
+  }%
+  \GCIfListNotEmpty{perks}{
     \charactersection*{Perks}%
     \GCPrintListOf{perks}
-  }{}%
-  \iftoggle{hasdisadvantages}{%
+  }%
+  \GCIfListNotEmpty{disadvantages}{%
     \charactersection*{Disadvantages}%
     \GCPrintListOf{disadvantages}
-  }{}%
-  \iftoggle{hasquirks}{%
+  }%
+  \GCIfListNotEmpty{quirks}{%
     \charactersection*{Quirks}%
     \GCPrintListOf{quirks}
-  }{}%
-  \iftoggle{hasskills}{%
+  }%
+  \GCIfListNotEmpty{skills}{%
     \charactersection*{Skills}%
     \GCPrintListOf{skills}
-  }{}%
-  \iftoggle{hasspells}{%
+  }%
+  \GCIfListNotEmpty{spells}{%
     \charactersection*{Spells}%
     \GCPrintListOf{spells}
-  }{}%
-  \iftoggle{hasattacks}{%
+  }%
+  \GCIfListNotEmpty{attacks}{%
     \charactersection*{\strut Attacks}\ \linebreak%
     \gurps@char@attacks%
-  }{}%
+  }%
   \IfValueTF{#1}{\ResetCharacterKey}{}%
 }
 %    \end{macrocode}
@@ -750,7 +733,7 @@ Running "make install" installs the files in the local TeX tree.
 % \begin{macro}{\name}
 %    \begin{macrocode}
 \NewDocumentCommand{\name}{m}{%
-  \gurps@char@insertattr{%
+  \GCInsertAttr{%
     name=Name,
     value=#1,
     type=metadata
@@ -766,7 +749,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the strength of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\ST}{mO{nil}}{
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=ST,
     type=basic_attribute,
     level=#1,
@@ -780,7 +763,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the dexterity of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\DX}{mO{nil}}{%
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=DX,
     type=basic_attribute,
     level=#1,
@@ -794,7 +777,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the IQ of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\IQ}{mO{nil}}{%
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=IQ,
     type=basic_attribute,
     level=#1,
@@ -808,7 +791,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the health of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\HT}{mO{nil}}{%
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=HT,
     type=basic_attribute,
     level=#1,
@@ -830,7 +813,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the HP of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\HP}{mO{nil}}{%
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=HP,
     type=secondary_characteristic,
     level=#1,
@@ -844,7 +827,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the perception of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\Per}{mO{nil}}{%
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=Per,
     type=secondary_characteristic,
     level=#1,
@@ -858,7 +841,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the will of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\Will}{mO{nil}}{%
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=Will,
     type=secondary_characteristic,
     level=#1,
@@ -872,7 +855,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the FP of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\FP}{mO{nil}}{%
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=FP,
     type=secondary_characteristic,
     level=#1,
@@ -886,7 +869,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the SM of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\SM}{m}{%
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=SM,
     type=property,
     level=#1
@@ -900,13 +883,13 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 \NewDocumentCommand{\DR}{om}{
   \IfValueTF{#1}{%
-    \gurps@char@insertattr{%
+    \GCInsertAttr{%
       name={DR (#1)},%
       type=property,%
       level=#2%
     }%%
   }{%
-    \gurps@char@insertattr{%
+    \GCInsertAttr{%
       name=DR,%
       type=property,%
       level=#2%
@@ -920,7 +903,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the thr of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\thr}{m}{
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=thr,
     type=property,
     diceexpr=#1
@@ -933,7 +916,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the sw of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\sw}{m}{
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name=sw,
     type=property,
     diceexpr=#1
@@ -948,7 +931,7 @@ Running "make install" installs the files in the local TeX tree.
 % with the gcs latex template.
 %    \begin{macrocode}
 \NewDocumentCommand{\characterpicture}{m}{
-    \gurps@char@insertattr{
+    \GCInsertAttr{
       name={Character picture},
       type=property,
       value={#1}
@@ -961,7 +944,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the Basic Speed of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\basicspeed}{mO{nil}}{
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name={Basic Speed},
     type=secondary_characteristic,
     level=#1,
@@ -974,7 +957,7 @@ Running "make install" installs the files in the local TeX tree.
 % Sets the Basic Move of the current character
 %    \begin{macrocode}
 \NewDocumentCommand{\basicmove}{mO{nil}}{
-  \gurps@char@insertattr{
+  \GCInsertAttr{
     name={Basic Move},
     type=secondary_characteristic,
     level=#1,
@@ -1099,7 +1082,7 @@ Running "make install" installs the files in the local TeX tree.
 % Adds an advantage to a character. NOTE: this only works in a |character|.
 %    \begin{macrocode}
 \NewDocumentCommand{\advantage}{mO{nil}}{%
-  \gurps@char@insertattr{%
+  \GCInsertAttr{%
     name={#1},%
     type=advantage,%
     points=#2%
@@ -1111,7 +1094,7 @@ Running "make install" installs the files in the local TeX tree.
 % Adds an perk to a character. NOTE: this only works in a |character|.
 %    \begin{macrocode}
 \NewDocumentCommand{\perk}{m}{%
-  \gurps@char@insertattr{%
+  \GCInsertAttr{%
     name={#1},%
     type=perk,%
     points=1%
@@ -1124,7 +1107,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\disadvantage}{mO{nil}}{%
-  \gurps@char@insertattr{%
+  \GCInsertAttr{%
     name={#1},%
     type=disadvantage,%
     points=#2%
@@ -1137,7 +1120,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\quirk}{m}{%
-  \gurps@char@insertattr{%
+  \GCInsertAttr{%
     name={#1},%
     type=quirk,%
     points=-1
@@ -1151,7 +1134,7 @@ Running "make install" installs the files in the local TeX tree.
 %    \begin{macrocode}
 % TODO finish this!
 \NewDocumentCommand{\levelledadvantage}{mmO{nil}}{%
-  \gurps@char@insertattr{%
+  \GCInsertAttr{%
     name={#1},%
     type=advantage,%
     level=#2,
@@ -1165,7 +1148,7 @@ Running "make install" installs the files in the local TeX tree.
 % |lens| environment.
 %    \begin{macrocode}
 \NewDocumentCommand{\levelleddisadvantage}{mmO{nil}}{%
-  \gurps@char@insertattr{%
+  \GCInsertAttr{%
     name={#1},%
     type=disadvantage,%
     level=#2,
@@ -1182,7 +1165,7 @@ Running "make install" installs the files in the local TeX tree.
 \NewDocumentCommand{\gurps@char@SpellOrSkill}{mm}{
   \NewDocumentCommand{#1}{mom}{%
     \IfValueTF{##2}{%
-      \makeatletter%
+      % \makeatletter%
       \luadirect{
         tmpone = \luastring{\unexpanded{##1}}
         tmptwo = \luastring{\unexpanded{##2}}
@@ -1191,7 +1174,7 @@ Running "make install" installs the files in the local TeX tree.
       \IfInteger{##2}{%
         \luadirect{
           tex.sprint(
-          [[\gurps@char@insertattr{]]
+          [[\GCInsertAttr{]]
             .. [[name={]] .. tmpone .. [[},]]
             .. [[type=#2,]]
             .. [[points=##2,]]
@@ -1204,7 +1187,7 @@ Running "make install" installs the files in the local TeX tree.
           basedon = tmptwo:gsub('/.*', '')
           difficulty = tmptwo:gsub('.*/', '')
           tex.sprint(
-          [[\gurps@char@insertattr{]]
+          [[\GCInsertAttr{]]
             .. [[name={]] .. tmpone .. [[},]]
             .. [[type=#2,]]
             .. [[basedon=]] .. basedon .. ','
@@ -1214,9 +1197,9 @@ Running "make install" installs the files in the local TeX tree.
           )
         }%
       }%
-      \makeatother%
+      % \makeatother%
     }{%
-      \gurps@char@insertattr{%
+      \GCInsertAttr{%
         name={##1},%
         type=#2,%
         level=##3

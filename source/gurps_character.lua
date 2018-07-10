@@ -13,6 +13,7 @@
 -- Thrust and Swing
 -- TODO find out how the lua table serialisation works and use that instead.
 require "gurps_tables"
+require "etb_extensions"
 
 _GGURPS_CHARACTER_CONFIG = {
   print_points=true,
@@ -546,29 +547,6 @@ function check_and_fix_attrs_and_points(character_key)
   )
 end
 
-function check_and_fix_toggles(character_key)
-  c = get_character(character_key)
-  things = {
-    "advantage",
-    "perk",
-    "disadvantage",
-    "quirk",
-    "trait",
-    "skill",
-    "spell",
-    "attack"
-  }
-  for _,v in ipairs(things) do
-    f = load([[l = filter(is_]] .. v .. [[, c)]])
-    f()
-    if l then
-      tex.sprint([[\toggletrue{has]] .. v .. [[s}]])
-    else
-      tex.sprint([[\togglefalse{has]] .. v .. [[s}]])
-    end
-  end
-end
-
 -- the function for \GCGet
 -- TODO rename this function! It gets dice expressions too!
 function tex_get_value_or_level(character_key, name, macro)
@@ -673,3 +651,20 @@ function test_create_list_predicate()
 end
 
 test_create_list_predicate()
+
+function tex_if_list_not_empty(listname, evalstring)
+  listname_to_predicate = {
+    advantages=is_advantage,
+    disadvantages=is_disadvantage,
+    traits=is_trait,
+    perks=is_perk,
+    quirks=is_quirk,
+    skills=is_skill,
+    spells=is_spell,
+    attacks=is_attack
+  }
+
+  if cfilter(listname_to_predicate[listname]) then
+    tex.sprint(evalstring)
+  end
+end
