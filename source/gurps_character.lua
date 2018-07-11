@@ -182,6 +182,8 @@ function reduce(f, arr)
   return retval
 end
 
+-- Predicates --
+
 function is_valid_attribute(attr)
   return attr.name and attr.type
 end
@@ -245,6 +247,39 @@ function is_attack(attr)
   return is_ranged_attack(attr) or is_melee_attack(attr)
 end
 
+
+_GPREDICATES = {
+  advantages=is_advantage,
+  disadvantages=is_disadvantage,
+  traits=is_trait,
+  perks=is_perk,
+  quirks=is_quirk,
+  skills=is_skill,
+  spells=is_spell,
+  basic_attributes=is_basic_attribute,
+  secondary_characteristics=is_secondary_characteristic,
+  properties=is_property,
+  attacks=is_attack
+}
+
+-- Quickly test the predicates are all valid
+for k,v in pairs(_GPREDICATES) do
+  if v == nil then
+    tex.error(k .. "has no predicate attached! This is a bug; contact the package author.")
+  end
+end
+
+function get_predicate(name)
+  local predicate = _GPREDICATES[name]
+  if predicate == nil then
+    tex.error(name .. " predicate could not be got! This is a bug; contact the package author.")
+  end
+  return predicate
+end
+
+-- End of predicates --
+
+
 function is_valid_type(t)
   for k,v in pairs(enums.type) do
     if t == v then
@@ -289,7 +324,7 @@ function attr_to_tex(attr)
   end
 
   points_str = ""
-  if _GGURPS_CHARACTER_CONFIG.print_points then
+  if etb_is_toggletrue("GCPrintPointsToggle") then
     if not is_property(attr) and not is_attack(attr) then
       if attr.points then
         points_str = "[" .. attr.points .. "]"
@@ -591,29 +626,21 @@ end
 
 
 function create_list_predicate(tex_input)
-  available_predicates = {
-    advantage=is_advantage,
-    disadvantage=is_disadvantage,
-    trait=is_trait,
-    perk=is_perk,
-    quirk=is_quirk,
-    skill=is_skill,
-    spell=is_spell
-    -- no attack, it's not a 'real' trait
-  }
-
   if not tex_input:gmatch("%w+") then
     tex.error("No matches found! Were any arguments passed to create_list_predicate?\n\nHere they are: " .. tex_input)
   end
 
   local predicates = {}
-  for v,p in pairs(available_predicates) do
+  for v,p in pairs(_GPREDICATES) do
     print("v: " .. v)
-    for match in tex_input:gmatch("%w+") do
+    for match in tex_input:gmatch("[a-z_]+") do
       print("match: " .. match)
-      if match:find("^" .. v .. "s$") then
+      if match:find("^" .. v .. "$") then
         print("Match found!")
-        table.insert(predicates, available_predicates[v])
+        if get_predicate(v) == nil then
+          tex.error("The predicate for " .. v .. " could not be found.")
+        end
+        table.insert(predicates, get_predicate(v))
       else
         print("Match not found :(")
       end
@@ -624,7 +651,7 @@ function create_list_predicate(tex_input)
   retfunc = function(x)
     print("Entering anonymous function for predicating")
     for _,predicate in ipairs(predicates) do
-      print("predicate: " .. tostring(predicate))
+      print("predicate: " .. tostring(debug.getinfo(predicate).name))
       if predicate(x) then
         return true
       end
@@ -653,18 +680,7 @@ end
 test_create_list_predicate()
 
 function tex_if_list_not_empty(listname, evalstring)
-  listname_to_predicate = {
-    advantages=is_advantage,
-    disadvantages=is_disadvantage,
-    traits=is_trait,
-    perks=is_perk,
-    quirks=is_quirk,
-    skills=is_skill,
-    spells=is_spell,
-    attacks=is_attack
-  }
-
-  if cfilter(listname_to_predicate[listname]) then
+  if cfilter(get_predicate(listname)) then
     tex.sprint(evalstring)
   end
 end

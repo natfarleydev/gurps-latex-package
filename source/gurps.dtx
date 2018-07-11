@@ -664,41 +664,30 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
+% \begin{macro}{\gurps@char@printlistsection}
+%    \begin{macrocode}
+\NewDocumentCommand{\gurps@char@printlistsection}{mO{nil}m}{%
+  \GCIfListNotEmpty{#3}{%
+    \charactersection*{#1}%
+    \GCPrintListOf[#2]{#3}%
+  }%
+}
+%    \end{macrocode}
+% \end{macro}
 % \begin{macro}{\GCPrintCharacter}
 % (This function is mostly for debug at the moment)
 %    \begin{macrocode}
 \NewDocumentCommand{\GCPrintCharacter}{o}{%
   \IfValueTF{#1}{\SetCharacterKey{#1}}{}%
-  \charactersection*{Basic Attributes}%
-  \gurps@char@basicattributes%
-  \charactersection*{Secondary Characteristics}%
-  \gurps@char@secondarycharacteristics%
-  \charactersection*{Other}%
-  \gurps@char@properties%
-  \GCIfListNotEmpty{advantages}{%
-    \charactersection*{Advantages}%
-    \GCPrintListOf{advantages}%
-  }%
-  \GCIfListNotEmpty{perks}{
-    \charactersection*{Perks}%
-    \GCPrintListOf{perks}%
-  }%
-  \GCIfListNotEmpty{disadvantages}{%
-    \charactersection*{Disadvantages}%
-    \GCPrintListOf{disadvantages}%
-  }%
-  \GCIfListNotEmpty{quirks}{%
-    \charactersection*{Quirks}%
-    \GCPrintListOf{quirks}%
-  }%
-  \GCIfListNotEmpty{skills}{%
-    \charactersection*{Skills}%
-    \GCPrintListOf{skills}%
-  }%
-  \GCIfListNotEmpty{spells}{%
-    \charactersection*{Spells}%
-    \GCPrintListOf{spells}%
-  }%
+  \gurps@char@printlistsection{Basic Attributer}[basic_attributes_sorter]{basic_attributes}
+  \gurps@char@printlistsection{Secondary Characteristics}[secondary_characteristics_sorter]{secondary_characteristics}
+  \gurps@char@printlistsection{Other}{properties}%
+  \gurps@char@printlistsection{Advantages}{advantages}%
+  \gurps@char@printlistsection{Perks}{perks}%
+  \gurps@char@printlistsection{Disadvantages}{disadvantages}%
+  \gurps@char@printlistsection{Quirks}{quirks}%
+  \gurps@char@printlistsection{Skills}{skills}%
+  \gurps@char@printlistsection{Spells}{spells}%
   \GCIfListNotEmpty{attacks}{%
     \charactersection*{\strut Attacks}\ \linebreak%
     \GCPrintListOfAttacks%
@@ -1287,12 +1276,20 @@ Running "make install" installs the files in the local TeX tree.
   }{\end{itemize}}
 %    \end{macrocode}
 % \end{environment}
+
 %
 % \begin{macro}{\GCPrintAttr}
 % It's like this:
 % \cs{GCPrintAttr}\oarg{level/diceexpr}\marg{name}\oarg{points}. This
 % macro is usually called by the lua function |attr_to_tex| (which returns a
 % string)
+%
+% The following toggle is to check if points should be printed. It's used in the
+% |attr_to_tex| lua function.
+%    \begin{macrocode}
+\newtoggle{GCPrintPointsToggle}
+\toggletrue{GCPrintPointsToggle}
+%    \end{macrocode}
 %    \begin{macrocode}
 \NewDocumentCommand{\GCPrintAttr}{omo}{%
   \IfValueTF{#3}{%
@@ -1327,11 +1324,11 @@ Running "make install" installs the files in the local TeX tree.
 % \item spells
 % \item traits
 % \end{itemize}
-% Which can be mixed and matched like so \cs{GCPrintListOf}\marg{things} where
+% Which can be mixed and matched like so \cs{GCPrintListOf}\oarg{sorting method}\marg{things} where
 % things can be |perks,quirks| or |skills,advantages| etc..
 %    \begin{macrocode}
-\NewDocumentCommand{\GCPrintListOf}{m}{%
-  \luadirect{traitlistmaker(create_list_predicate(\luastring{#1}))}%
+\NewDocumentCommand{\GCPrintListOf}{O{nil}m}{%
+  \luadirect{traitlistmaker(create_list_predicate(\luastring{#2}), nil, #1)}%
 }
 %    \end{macrocode}
 % \end{macro}

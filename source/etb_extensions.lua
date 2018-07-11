@@ -9,7 +9,13 @@ end
 
 function etb_is_toggletrue(togglename)
   local toggle = token.create(etb_tgl(togglename))
-  return is_etb_toggletrue_tok(toggle)
+  if toggle.mode == _GETB_TOGGLE_TRUE.mode then
+    return true
+  elseif toggle.mode == _GETB_TOGGLE_FALSE.mode then
+    return false
+  else
+    tex.error("etb_extensions.lua: Invalid toggle passed? " .. togglename)
+  end
 end
 
 function etb_set_toggle(togglename, value)
