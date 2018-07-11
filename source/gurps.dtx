@@ -657,6 +657,9 @@ Running "make install" installs the files in the local TeX tree.
 %\subsection{Printing the character}
 %
 % \begin{macro}{\GCIfListNotEmpty}
+% Looks like \cs{GCIfListNotEmpty}\marg{list name}{tex.sprint if true}. An
+% interface to a lua function which only prints the contents if the list
+% specified is not empty.
 %    \begin{macrocode}
 \NewDocumentCommand{\GCIfListNotEmpty}{mm}{%
   \luadirect{tex_if_list_not_empty(\luastring{\unexpanded{#1}},
@@ -664,9 +667,9 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\gurps@char@printlistsection}
+% \begin{macro}{\GCPrintListSection}
 %    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@printlistsection}{mO{nil}m}{%
+\NewDocumentCommand{\GCPrintListSection}{mO{nil}m}{%
   \GCIfListNotEmpty{#3}{%
     \charactersection*{#1}%
     \GCPrintListOf[#2]{#3}%
@@ -675,19 +678,20 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 % \begin{macro}{\GCPrintCharacter}
-% (This function is mostly for debug at the moment)
+% This function prints the current character. It is of the form
+% \cs{GCPrintCharacter}\oarg{character key}.
 %    \begin{macrocode}
 \NewDocumentCommand{\GCPrintCharacter}{o}{%
   \IfValueTF{#1}{\SetCharacterKey{#1}}{}%
-  \gurps@char@printlistsection{Basic Attributer}[basic_attributes_sorter]{basic_attributes}
-  \gurps@char@printlistsection{Secondary Characteristics}[secondary_characteristics_sorter]{secondary_characteristics}
-  \gurps@char@printlistsection{Other}{properties}%
-  \gurps@char@printlistsection{Advantages}{advantages}%
-  \gurps@char@printlistsection{Perks}{perks}%
-  \gurps@char@printlistsection{Disadvantages}{disadvantages}%
-  \gurps@char@printlistsection{Quirks}{quirks}%
-  \gurps@char@printlistsection{Skills}{skills}%
-  \gurps@char@printlistsection{Spells}{spells}%
+  \GCPrintListSection{Basic Attributer}[basic_attributes_sorter]{basic_attributes}
+  \GCPrintListSection{Secondary Characteristics}[secondary_characteristics_sorter]{secondary_characteristics}
+  \GCPrintListSection{Other}{properties}%
+  \GCPrintListSection{Advantages}{advantages}%
+  \GCPrintListSection{Perks}{perks}%
+  \GCPrintListSection{Disadvantages}{disadvantages}%
+  \GCPrintListSection{Quirks}{quirks}%
+  \GCPrintListSection{Skills}{skills}%
+  \GCPrintListSection{Spells}{spells}%
   \GCIfListNotEmpty{attacks}{%
     \charactersection*{\strut Attacks}\ \linebreak%
     \GCPrintListOfAttacks%
