@@ -1332,9 +1332,9 @@ Running "make install" installs the files in the local TeX tree.
 }
 %    \end{macrocode}
 % \end{macro}
-% \begin{macro}{\gurps@char@totalpoints}
+% \begin{macro}{\GCTotalPoints}
 %    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@totalpoints}{O{_}}{%
+\NewDocumentCommand{\GCTotalPoints}{O{_}}{%
   \luadirect{tex.sprint(sum_points(\luastring{\unexpanded{#1}}))}~pt%
 }
 %    \end{macrocode}
