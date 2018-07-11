@@ -697,22 +697,6 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{macro}
 %
-% \begin{macro}{\gurps@char@getattrlevel}
-%    \begin{macrocode}
-\NewDocumentCommand{\gurps@char@getattrlevel}{m}{%
-  \luadirect{
-    x = filter({name=\luastring{#1}}, get_character(_GCHARACTERKEY))
-    if x then
-      tex.sprint(x.level)
-    else
-      tex.sprint([[\PackageError{gurps}{Stat '#1' not found!}]])
-    end
-  }%
-}
-%    \end{macrocode}
-% \end{macro}
-%
-%
 %\subsubsection{Metadata}
 %\label{sec:char-metadata}
 %
@@ -1259,11 +1243,11 @@ Running "make install" installs the files in the local TeX tree.
 %    \end{macrocode}
 % \end{environment}
 % 
-% \begin{environment}{attacklist}
+% \begin{environment}{GCAttackList}
 %  We define the |attacktraitlist| to list the traits. By default, this is an
 %  |itemize*| from the |enumitem| package with some customisations
 %    \begin{macrocode}
-\NewDocumentEnvironment{attacklist}{}
+\NewDocumentEnvironment{GCAttackList}{}
 {%
   \noindent%
   \begin{itemize}[%

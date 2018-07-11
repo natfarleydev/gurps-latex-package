@@ -384,7 +384,7 @@ end
 function attacklist(character_key)
   attacks = cfilter(is_attack, character_key)
   if attacks then
-    s = [[\begin{attacklist}]]
+    s = [[\begin{GCAttackList}]]
     for _,attack in ipairs(attacks) do
       if attack.range and attack.range ~= "NotSet" then
         range_or_reach = "range"
@@ -399,7 +399,7 @@ function attacklist(character_key)
         .. "{" .. attack[range_or_reach] .. "}"
         .. "{" .. attack.notes .. "}"
     end
-    s = s .. [[ \end{attacklist}]]
+    s = s .. [[ \end{GCAttackList}]]
     tex.sprint(s)
   end
 end
