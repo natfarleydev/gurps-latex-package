@@ -10,8 +10,8 @@ $(NAME).pdf: $(NAME).dtx
 	lualatex -recorder -interaction=batchmode $(NAME).dtx >/dev/null
 	if [ -f $(NAME).glo ]; then makeindex -q -s gglo.ist -o $(NAME).gls $(NAME).glo; fi
 	if [ -f $(NAME).idx ]; then makeindex -q -s gind.ist -o $(NAME).ind $(NAME).idx; fi
-	lualatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
-	lualatex --recorder --interaction=nonstopmode $(NAME).dtx > /dev/null
+	lualatex --recorder --interaction=nonstopmode $(NAME).dtx
+	lualatex --recorder --interaction=nonstopmode $(NAME).dtx
 clean:
 	rm -f $(NAME).{aux,fls,glo,gls,hd,idx,ilg,ind,ins,log,out}
 distclean: clean
